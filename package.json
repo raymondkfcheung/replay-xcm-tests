@@ -2,8 +2,11 @@
   "name": "replay-xcm-tests",
   "version": "1.0.0",
   "description": "Replay XCMs Using Chopsticks",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -20,5 +23,10 @@
   "homepage": "https://github.com/raymondkfcheung/replay-xcm-tests#readme",
   "dependencies": {
     "polkadot-api": "^1.14.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.3",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
   }
 }
