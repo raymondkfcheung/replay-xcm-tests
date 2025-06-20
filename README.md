@@ -45,14 +45,14 @@ This will compile the TypeScript code from the `src/` directory into JavaScript 
 
 ### Running Local Chains with Chopsticks
 
-To test XCM, you'll need to run local instances of the relevant blockchain networks using Chopsticks. The project's tests assume you have these local chains running.
+To test XCM, you'll need to run local instances of the relevant blockchain networks using Chopsticks. The project's tests assume these local chains are running.
 
-An example command to run a Polkadot relay chain with Pokadot Asset Hub and Acala parachains locally:
+An example command to run a Polkadot relay chain with Polkadot Asset Hub and Acala parachains locally:
 
 ```bash
 npx @acala-network/chopsticks xcm -r polkadot -p polkadot-asset-hub -p acala
 
-# Or using the script to launch
+# Or, using the script to launch:
 # ./scripts/launch-chopsticks.sh
 ```
 
@@ -60,13 +60,13 @@ This command will typically start nodes on `ws://localhost:8000`, `ws://localhos
 
 ### Running Sample Code
 
-Assume Polkadot Asset Hub is on the port 8000, you can use [Polkadot-API](https://docs.polkadot.com/develop/toolkit/api-libraries/papi/) to generate the necessary types:
+Assuming Polkadot Asset Hub is on port 8000, you can use [Polkadot-API](https://docs.polkadot.com/develop/toolkit/api-libraries/papi/) to generate the necessary types:
 
 ```bash
 npx papi add assetHub -w ws://localhost:8000
 ```
 
-Once your local Chopsticks networks are running, you can execute the sample script:
+Once descriptors are ready, you can execute the sample script:
 
 ```bash
 npx ts-node src/set-topic.ts
