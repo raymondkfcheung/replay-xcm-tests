@@ -6,10 +6,15 @@ import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat";
 import { Keyring } from "@polkadot/keyring";
 import { blake2AsHex, cryptoWaitReady } from '@polkadot/util-crypto';
 
-const bigIntToJson = (_key: any, value: any) => {
+const toHuman = (_key: any, value: any) => {
     if (typeof value === 'bigint') {
         return Number(value);
     }
+
+    if (value && typeof value === "object" && typeof value.asHex === "function") {
+        return value.asHex();
+    }
+
     return value;
 };
 
@@ -29,7 +34,7 @@ async function main() {
         ),
         XcmV5Instruction.SetTopic(Binary.fromHex(blake2AsHex("replay-xcm-tests-topic", 256))),
     ]);
-    console.log("XCM:", JSON.stringify(message, bigIntToJson, 2));
+    console.log("XCM:", JSON.stringify(message, toHuman, 2));
 
     const weight: any = await api.apis.XcmPaymentApi.query_xcm_weight(message);
     console.log("Estimated weight:", weight);
@@ -38,10 +43,22 @@ async function main() {
         message,
         max_weight: weight.value,
     });
-    console.log("Decoded Call:", JSON.stringify(tx.decodedCall, bigIntToJson, 2));
+    console.log("Decoded Call:", JSON.stringify(tx.decodedCall, toHuman, 2));
 
     const result = await tx.signAndSubmit(aliceSigner);
-    console.log("Transaction Result:", JSON.stringify(result, bigIntToJson, 2));
+    console.log(`✅ Finalised in block #${result.block.number}: ${result.block.hash}`);
+    if (!result.ok) {
+        const dispatchError = result.dispatchError;
+        if (dispatchError.type === "Module") {
+            const modErr: any = dispatchError.value;
+            console.error("❌ Dispatch error in module:", modErr.type, modErr.value?.type);
+        } else {
+            console.error("❌ Dispatch error:", JSON.stringify(dispatchError, toHuman, 2));
+        }
+    }
+    for (const event of result.events) {
+        console.log("📣 Event:", event.type, JSON.stringify(event.value, toHuman, 2));
+    }
 
     client.destroy();
 }
