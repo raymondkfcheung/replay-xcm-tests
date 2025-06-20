@@ -4,7 +4,7 @@ import { getWsProvider } from "polkadot-api/ws-provider/web";
 import { getPolkadotSigner } from "polkadot-api/signer";
 import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat";
 import { Keyring } from "@polkadot/keyring";
-import { cryptoWaitReady } from '@polkadot/util-crypto';
+import { blake2AsHex, cryptoWaitReady } from '@polkadot/util-crypto';
 
 const bigIntToJson = (_key: any, value: any) => {
     if (typeof value === 'bigint') {
@@ -17,18 +17,14 @@ async function main() {
     await cryptoWaitReady();
     const provider = withPolkadotSdkCompat(getWsProvider("ws://localhost:8000"));
     const client = createClient(provider);
-
     const api = client.getTypedApi(assetHub);
 
     const keyring = new Keyring({ type: "sr25519" });
     const alice = keyring.addFromUri("//Alice");
-    let aliceSigner = getPolkadotSigner(alice.publicKey,
-        "Sr25519",
-        alice.sign,
-    );
+    const aliceSigner = getPolkadotSigner(alice.publicKey, "Sr25519", alice.sign);
 
     const message: AssetHubCalls['PolkadotXcm']['execute']['message'] = Enum("V5", [
-        XcmV5Instruction.SetTopic(Binary.fromHex("0x" + "00".repeat(28) + "12345678"))
+        XcmV5Instruction.SetTopic(Binary.fromHex(blake2AsHex("replay-xcm-tests-topic", 256)))
     ]);
     console.log("XCM:", JSON.stringify(message, bigIntToJson, 2));
 
@@ -44,7 +40,7 @@ async function main() {
     const result = await tx.signAndSubmit(aliceSigner);
     console.log("Transaction Result:", JSON.stringify(result, bigIntToJson, 2));
 
-    await client.disconnect();
+    client.destroy();
 }
 
 main().catch(console.error);
