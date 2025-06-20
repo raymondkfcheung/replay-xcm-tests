@@ -23,6 +23,7 @@
   "homepage": "https://github.com/raymondkfcheung/replay-xcm-tests#readme",
   "dependencies": {
     "@polkadot-api/descriptors": "file:.papi/descriptors",
+    "@polkadot/api": "^16.2.2",
     "polkadot-api": "^1.14.0"
   },
   "devDependencies": {
