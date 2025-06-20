@@ -30,7 +30,7 @@ async function main() {
 
     const message: AssetHubCalls['PolkadotXcm']['execute']['message'] = Enum("V5", [
         XcmV5Instruction.DescendOrigin(
-            XcmV5Junctions.X1(XcmV5Junction.AccountId32({ network: undefined, id: Binary.fromBytes(alice.publicKey) }))
+            XcmV5Junctions.X1(XcmV5Junction.AccountId32({ id: Binary.fromBytes(alice.publicKey) }))
         ),
         XcmV5Instruction.SetTopic(Binary.fromHex(blake2AsHex("replay-xcm-tests-topic", 256))),
     ]);
