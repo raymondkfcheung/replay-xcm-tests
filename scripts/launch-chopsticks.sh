@@ -22,7 +22,7 @@ get_config_path() {
 
 # --- Parse Arguments and Set Defaults ---
 
-# RELAY_CHAIN
+# Relay Chain
 RELAY_CHAIN_ARG="${1}"
 DEFAULT_RELAY_CHAIN="polkadot"
 
@@ -36,7 +36,7 @@ fi
 RELAY_CHAIN_CONFIG=$(get_config_path "${RELAY_CHAIN_FINAL_NAME}")
 echo "Relay Chain config: ${RELAY_CHAIN_CONFIG}"
 
-# PARA_CHAIN_1
+# Parachain 1
 PARA_CHAIN_1_ARG="${2}"
 DEFAULT_PARA_CHAIN_1="polkadot-asset-hub"
 
@@ -50,7 +50,7 @@ fi
 PARA_CHAIN_1_CONFIG=$(get_config_path "${PARA_CHAIN_1_FINAL_NAME}")
 echo "Parachain 1 config: ${PARA_CHAIN_1_CONFIG}"
 
-# PARA_CHAIN_2
+# Parachain 2
 PARA_CHAIN_2_ARG="${3}"
 DEFAULT_PARA_CHAIN_2="acala"
 
