@@ -52,7 +52,7 @@ if [ ! -f "${POLKADOT_OVERRIDE_CONFIG}" ]; then
     echo "File downloaded. Applying modifications..."
 
     # Use sed to update wasm-override path
-    sed -i '' "s|wasm-override: polkadot_runtime.compact.compressed.wasm|wasm-override: wasms/polkadot_runtime.compact.compressed.wasm|g" "${POLKADOT_OVERRIDE_CONFIG}"
+    sed -i '' "s|# wasm-override: polkadot_runtime.compact.compressed.wasm|wasm-override: wasms/polkadot_runtime.compact.compressed.wasm|g" "${POLKADOT_OVERRIDE_CONFIG}"
     
     # Ensure runtime-log-level: 5 is present/set.
     # This sed command adds or replaces the line. It's more robust than just search/replace.
