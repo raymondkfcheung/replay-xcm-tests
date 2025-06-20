@@ -1,4 +1,4 @@
-import { assetHub, AssetHubCalls, XcmV5Instruction } from "@polkadot-api/descriptors";
+import { assetHub, AssetHubCalls, XcmV5Instruction, XcmV5Junction, XcmV5Junctions } from "@polkadot-api/descriptors";
 import { Binary, createClient, Enum } from "polkadot-api";
 import { getWsProvider } from "polkadot-api/ws-provider/web";
 import { getPolkadotSigner } from "polkadot-api/signer";
@@ -24,7 +24,10 @@ async function main() {
     const aliceSigner = getPolkadotSigner(alice.publicKey, "Sr25519", alice.sign);
 
     const message: AssetHubCalls['PolkadotXcm']['execute']['message'] = Enum("V5", [
-        XcmV5Instruction.SetTopic(Binary.fromHex(blake2AsHex("replay-xcm-tests-topic", 256)))
+        XcmV5Instruction.DescendOrigin(
+            XcmV5Junctions.X1(XcmV5Junction.AccountId32({ network: undefined, id: Binary.fromBytes(alice.publicKey) }))
+        ),
+        XcmV5Instruction.SetTopic(Binary.fromHex(blake2AsHex("replay-xcm-tests-topic", 256))),
     ]);
     console.log("XCM:", JSON.stringify(message, bigIntToJson, 2));
 
