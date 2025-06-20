@@ -34,16 +34,17 @@ async function main() {
         ),
         XcmV5Instruction.SetTopic(Binary.fromHex(blake2AsHex("replay-xcm-tests-topic", 256))),
     ]);
-    console.log("XCM:", JSON.stringify(message, toHuman, 2));
-
     const weight: any = await api.apis.XcmPaymentApi.query_xcm_weight(message);
-    console.log("Estimated weight:", weight);
-
+    if (weight.success !== true) {
+        console.error("❌ Failed to query XCM weight:", weight.error);
+        client.destroy();
+        return;
+    }
     const tx = api.tx.PolkadotXcm.execute({
         message,
         max_weight: weight.value,
     });
-    console.log("Decoded Call:", JSON.stringify(tx.decodedCall, toHuman, 2));
+    console.log("Executing XCM:", JSON.stringify(tx.decodedCall, toHuman, 2));
 
     const result = await tx.signAndSubmit(aliceSigner);
     console.log(`✅ Finalised in block #${result.block.number}: ${result.block.hash}`);
