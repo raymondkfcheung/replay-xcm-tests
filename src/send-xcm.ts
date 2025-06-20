@@ -1,54 +1,50 @@
-import { ApiPromise, WsProvider, Keyring } from '@polkadot/api';
+import { assetHub, AssetHubCalls, XcmV5Instruction } from "@polkadot-api/descriptors";
+import { Binary, createClient, Enum } from "polkadot-api";
+import { getWsProvider } from "polkadot-api/ws-provider/web";
+import { getPolkadotSigner } from "polkadot-api/signer";
+import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat";
+import { Keyring } from "@polkadot/keyring";
+import { cryptoWaitReady } from '@polkadot/util-crypto';
+
+const bigIntToJson = (_key: any, value: any) => {
+    if (typeof value === 'bigint') {
+        return Number(value);
+    }
+    return value;
+};
 
 async function main() {
-    const provider = new WsProvider('ws://localhost:8000');
-    const api = await ApiPromise.create({ provider });
+    await cryptoWaitReady();
+    const provider = withPolkadotSdkCompat(getWsProvider("ws://localhost:8000"));
+    const client = createClient(provider);
 
-    const keyring = new Keyring({ type: 'sr25519' });
-    const alice = keyring.addFromUri('//Alice');
+    const api = client.getTypedApi(assetHub);
 
-    const tx = api.tx.polkadotXcm.send(
-        {
-            V5: {
-                parents: 1,
-                interior: 'Here'
-            }
-        },
-        {
-            V5: [
-                { SetTopic: '0x' + '00'.repeat(28) + '12345678' }
-            ]
-        }
+    const keyring = new Keyring({ type: "sr25519" });
+    const alice = keyring.addFromUri("//Alice");
+    let aliceSigner = getPolkadotSigner(alice.publicKey,
+        "Sr25519",
+        alice.sign,
     );
 
-    console.log('Submitting extrinsic:', tx.toHuman());
+    const message: AssetHubCalls['PolkadotXcm']['execute']['message'] = Enum("V5", [
+        XcmV5Instruction.SetTopic(Binary.fromHex("0x" + "00".repeat(28) + "12345678"))
+    ]);
+    console.log("XCM:", JSON.stringify(message, bigIntToJson, 2));
 
-    await new Promise<void>(async (resolve) => {
-        const unsub = await tx.signAndSend(alice, ({ status, events, dispatchError }) => {
-            if (status.isInBlock) {
-                console.log('📦 Included in block:', status.asInBlock.toHex());
-            } else if (status.isFinalized) {
-                console.log('✅ Finalised in block:', status.asFinalized.toHex());
-                unsub();
-                resolve();
-            }
+    const weight: any = await api.apis.XcmPaymentApi.query_xcm_weight(message);
+    console.log("Estimated weight:", weight);
 
-            if (dispatchError) {
-                if (dispatchError.isModule) {
-                    const decoded = api.registry.findMetaError(dispatchError.asModule);
-                    console.error('❌ Dispatch error:', decoded.section, decoded.name);
-                } else {
-                    console.error('❌ Dispatch error:', dispatchError.toString());
-                }
-            }
-
-            for (const { event } of events) {
-                console.log('📣 Event:', event.section, event.method, event.data.toHuman());
-            }
-        });
+    const tx = api.tx.PolkadotXcm.execute({
+        message,
+        max_weight: weight.value,
     });
+    console.log("Decoded Call:", JSON.stringify(tx.decodedCall, bigIntToJson, 2));
 
-    await api.disconnect();
+    const result = await tx.signAndSubmit(aliceSigner);
+    console.log("Transaction Result:", JSON.stringify(result, bigIntToJson, 2));
+
+    await client.disconnect();
 }
 
 main().catch(console.error);

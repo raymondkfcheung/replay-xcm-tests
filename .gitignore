@@ -136,6 +136,7 @@ dist
 .pnp.*
 
 # Other files
+.papi/
 db.sqlite*
 package-lock.json
 wasms/*.wasm
