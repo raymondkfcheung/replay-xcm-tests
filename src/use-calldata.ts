@@ -28,17 +28,7 @@ async function main() {
     const alice = keyring.addFromUri("//Alice");
     const aliceSigner = getPolkadotSigner(alice.publicKey, "Sr25519", alice.sign);
 
-    const clientAHP = createClient(withPolkadotSdkCompat(getWsProvider("wss://polkadot-asset-hub-rpc.polkadot.io")));
-    const hash = await clientAHP._request<string>("chain_getBlockHash", [9079592]);
-    const block = await clientAHP._request<any>("chain_getBlock", [hash]);
-    const extrinsics = block.block.extrinsics;
-    // extrinsics.forEach((ext: string, index: number) => {
-    //     console.log(`Extrinsic ${index}:`, ext);
-    // });
-    const extrinsic = extrinsics[2];
-    const callData = Binary.fromHex(extrinsic);
-    console.log("Hex call data:", callData.asHex());
-
+    const callData = Binary.fromHex("0x1f0803010100411f0300010100fc39fcf04a8071b7409823b7c82427ce67910c6ed80aa0e5093aff234624c8200304000002043205011f0092e81d790000000000");
     const tx = await api.txFromCallData(callData);
     console.log("Executing XCM:", JSON.stringify(tx.decodedCall, toHuman, 2));
 
