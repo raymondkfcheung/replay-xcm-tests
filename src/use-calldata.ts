@@ -4,7 +4,7 @@ import { getWsProvider } from "polkadot-api/ws-provider/web";
 import { getPolkadotSigner } from "polkadot-api/signer";
 import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat";
 import { Keyring } from "@polkadot/keyring";
-import { cryptoWaitReady } from '@polkadot/util-crypto';
+import { cryptoWaitReady } from "@polkadot/util-crypto";
 
 const toHuman = (_key: any, value: any) => {
     if (typeof value === 'bigint') {
@@ -20,6 +20,7 @@ const toHuman = (_key: any, value: any) => {
 
 async function main() {
     await cryptoWaitReady();
+
     const provider = withPolkadotSdkCompat(getWsProvider("ws://localhost:8000"));
     const client = createClient(provider);
     const api = client.getTypedApi(assetHub);
@@ -28,25 +29,39 @@ async function main() {
     const alice = keyring.addFromUri("//Alice");
     const aliceSigner = getPolkadotSigner(alice.publicKey, "Sr25519", alice.sign);
 
-    const callData = Binary.fromHex("0x1f0803010100411f0300010100fc39fcf04a8071b7409823b7c82427ce67910c6ed80aa0e5093aff234624c8200304000002043205011f0092e81d790000000000");
+    const callData = Binary.fromHex(
+        "0x1f0803010100411f0300010100fc39fcf04a8071b7409823b7c82427ce67910c6ed80aa0e5093aff234624c8200304000002043205011f0092e81d790000000000"
+    );
     const tx = await api.txFromCallData(callData);
     console.log("Executing XCM:", JSON.stringify(tx.decodedCall, toHuman, 2));
 
-    const result = await tx.signAndSubmit(aliceSigner);
-    console.log(`✅ Finalised in block #${result.block.number}: ${result.block.hash}`);
-    if (!result.ok) {
-        const dispatchError = result.dispatchError;
-        if (dispatchError.type === "Module") {
-            const modErr: any = dispatchError.value;
-            console.error("❌ Dispatch error in module:", modErr.type, modErr.value?.type);
-        } else {
-            console.error("❌ Dispatch error:", JSON.stringify(dispatchError, toHuman, 2));
-        }
-    }
-    for (const event of result.events) {
-        console.log("📣 Event:", event.type, JSON.stringify(event.value, toHuman, 2));
-    }
+    await new Promise<void>(async (resolve) => {
+        const subscription = tx.signSubmitAndWatch(aliceSigner).subscribe((ev) => {
+            if (ev.type === "finalized" ||
+                (ev.type === "txBestBlocksState" && ev.found)
+            ) {
+                console.log(`📦 Included in block #${ev.block.number}: ${ev.block.hash}`);
 
+                if (!ev.ok) {
+                    const dispatchError = ev.dispatchError;
+                    if (dispatchError.type === "Module") {
+                        const modErr: any = dispatchError.value;
+                        console.error(`❌ Dispatch error in module: ${modErr.type} → ${modErr.value?.type}`);
+                    } else {
+                        console.error("❌ Dispatch error:", JSON.stringify(dispatchError, toHuman, 2));
+                    }
+                }
+                for (const event of ev.events) {
+                    console.log("📣 Event:", event.type, JSON.stringify(event.value, toHuman, 2));
+                }
+            }
+        });
+
+        subscription.unsubscribe();
+        resolve();
+    });
+
+    console.log("✅ Process completed, exiting...");
     client.destroy();
 }
 
