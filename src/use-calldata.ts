@@ -35,11 +35,9 @@ async function main() {
     const tx = await api.txFromCallData(callData);
     console.log("Executing XCM:", JSON.stringify(tx.decodedCall, toHuman, 2));
 
-    await new Promise<void>(async (resolve) => {
+    await new Promise<void>((resolve) => {
         const subscription = tx.signSubmitAndWatch(aliceSigner).subscribe((ev) => {
-            if (ev.type === "finalized" ||
-                (ev.type === "txBestBlocksState" && ev.found)
-            ) {
+            if (ev.type === "finalized" || (ev.type === "txBestBlocksState" && ev.found)) {
                 console.log(`📦 Included in block #${ev.block.number}: ${ev.block.hash}`);
 
                 if (!ev.ok) {
@@ -51,17 +49,18 @@ async function main() {
                         console.error("❌ Dispatch error:", JSON.stringify(dispatchError, toHuman, 2));
                     }
                 }
+
                 for (const event of ev.events) {
                     console.log("📣 Event:", event.type, JSON.stringify(event.value, toHuman, 2));
                 }
+
+                console.log("✅ Process completed, exiting...");
+                subscription.unsubscribe();
+                resolve();
             }
         });
-
-        subscription.unsubscribe();
-        resolve();
     });
 
-    console.log("✅ Process completed, exiting...");
     client.destroy();
 }
 
