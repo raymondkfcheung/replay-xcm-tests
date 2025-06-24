@@ -66,10 +66,18 @@ Assuming Polkadot Asset Hub is on port 8000, you can use [Polkadot-API](https://
 npx papi add assetHub -w ws://localhost:8000
 ```
 
-Once descriptors are ready, you can execute the sample script:
+Once descriptors are ready, you can execute the sample scripts:
+
+* Set Topic
 
 ```bash
 npx ts-node src/set-topic.ts
+```
+
+* Use Calldata to replay
+
+```bash
+npx ts-node src/use-calldata.ts
 ```
 
 ## License
