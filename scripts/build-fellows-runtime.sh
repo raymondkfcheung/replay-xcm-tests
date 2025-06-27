@@ -71,7 +71,7 @@ fi
 echo "${TARGET_RUNTIME_ARG} runtime built successfully."
 
 # Verify build (this check is still useful after the cargo build check)
-COMPILED_WASM_PATH="target/release/wbuild/${CARGO_PACKAGE}/${WASM_FILENAME}"
+COMPILED_WASM_PATH="target/debug/wbuild/${CARGO_PACKAGE}/${WASM_FILENAME}"
 if [ ! -f "${COMPILED_WASM_PATH}" ]; then
     echo "Error: ${WASM_FILENAME} not found at expected path: ${COMPILED_WASM_PATH} after successful build command!"
     echo "This might indicate a problem with the wbuild process or a misconfigured target path."
