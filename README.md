@@ -1,92 +1,125 @@
-# Replay XCMs Using Chopsticks
+# 🛰️ Replay XCMs Using Chopsticks
 
-[Chopsticks](https://github.com/AcalaNetwork/chopsticks) is a tool for forking live Polkadot SDK-based chains in a local environment. If you're new to it, check out the [Get Started](https://docs.polkadot.com/develop/toolkit/parachains/fork-chains/chopsticks/get-started/) guide.
+[Chopsticks](https://github.com/AcalaNetwork/chopsticks) is a tool for forking live Polkadot SDK-based chains in a local environment. This project demonstrates how to **replay and debug XCMs** locally using Chopsticks, [Polkadot-API](https://docs.polkadot.com/develop/toolkit/api-libraries/papi/), and the [XCM Runtime APIs](https://docs.polkadot.com/develop/interoperability/xcm-runtime-apis/).
 
-This tutorial focuses specifically on replaying [XCMs](https://docs.polkadot.com/develop/interoperability/intro-to-xcm/), a powerful technique for:
+📘 If you’re unfamiliar with Chopsticks, start with the [Get Started guide](https://docs.polkadot.com/develop/toolkit/parachains/fork-chains/chopsticks/get-started/).
 
-* [Debugging cross-chain message failures](https://docs.polkadot.com/develop/interoperability/test-and-debug/)
-* Tracing execution across relay chains and parachains
-* Using [XCM Runtime APIs](https://docs.polkadot.com/develop/interoperability/xcm-runtime-apis/)
-* Analysing weight usage, error types, and message flow
+## 🧭 What This Project Enables
 
-## Getting Started
+* 🔍 Replaying real XCMs from the live network using `callData`
+* 🐞 Debugging XCM failures by dry-running them without changing state
+* 🔁 Tracing multi-hop messages and observing forwarded XCMs
+* ⚖️ Analysing weight usage, fee logic, and emitted events via runtime APIs
 
-Follow these instructions to get a copy of the project up and running on your local machine for development and testing purposes.
+---
 
-### Clone the Repository
+## ⚙️ Setup
 
-First, clone the repository to your local machine using Git:
+Clone this repository using Git:
 
 ```bash
 git clone git@github.com:raymondkfcheung/replay-xcm-tests.git
 cd replay-xcm-tests
 ```
 
-### Install Dependencies
-
-Navigate into the cloned project directory and install the required Node.js dependencies:
+Install the required dependencies:
 
 ```bash
 npm install
 ```
 
-This command will install all the necessary packages listed in `package.json`.
-
-### Build the Project
-
-This project uses TypeScript. Before running, you need to compile the TypeScript source files into JavaScript:
+Compile the TypeScript code:
 
 ```bash
 npm run build
 ```
 
-This will compile the TypeScript code from the `src/` directory into JavaScript files in the `dist/` directory.
+---
 
-## Usage
+## 🚀 Usage
 
 ### Running Local Chains with Chopsticks
 
-To test XCM, you'll need to run local instances of the relevant blockchain networks using Chopsticks. The project's tests assume these local chains are running.
-
-An example command to run a Polkadot relay chain with Polkadot Asset Hub and Acala parachains locally:
+Launch local forks of relevant chains. For example, to fork Polkadot, Asset Hub, and Acala:
 
 ```bash
 npx @acala-network/chopsticks xcm -r polkadot -p polkadot-asset-hub -p acala
 
-# Or, using the script to launch:
+# Or use the helper script provided
 # ./scripts/launch-chopsticks.sh
 ```
 
-This command will typically start nodes on `ws://localhost:8000`, `ws://localhost:8001`, `ws://localhost:8002`. Check your terminal output from the `chopsticks` command for the exact endpoints.
+The WebSocket endpoints are typically exposed at `localhost:8000`, `8001`, `8002`, but always check the terminal output from Chopsticks.
 
-### Running Sample Code
+---
 
-Assuming Polkadot Asset Hub is on port 8000, you can use [Polkadot-API](https://docs.polkadot.com/develop/toolkit/api-libraries/papi/) to generate the necessary types:
+### Generating Polkadot-API Descriptors
+
+Generate typed API descriptors for your forked chain using [`papi`](https://docs.polkadot.com/develop/toolkit/api-libraries/papi/):
 
 ```bash
 npx papi add assetHub -w ws://localhost:8000
 ```
 
-Once descriptors are ready, you can execute the sample scripts:
+---
 
-* Set Topic
+### Running the Example Scripts
+
+Once descriptors are available, the following scripts may be executed:
+
+#### 🔖 Set an XCM Topic
+
+Helps trace XCMs with a consistent topic ID:
 
 ```bash
 npx ts-node src/set-topic.ts
 ```
 
-* Use Calldata to replay
+#### 🧬 Replay Using Call Data
+
+Replays an encoded call captured from Subscan:
 
 ```bash
 npx ts-node src/use-calldata.ts
 ```
 
-* Dry run with calldata
+#### 🧪 Dry Run the XCM
+
+Simulates execution of the XCM without affecting state. This outputs execution success, emitted events, and forwarded messages:
 
 ```bash
 npx ts-node src/exec-dry-run.ts
 ```
 
-## License
+Example output on success:
+
+```json
+{
+  "execution_result": { "success": true, "value": { ... } },
+  "emitted_events": [ ... ],
+  "local_xcm": { ... },
+  "forwarded_xcms": [ ... ]
+}
+```
+
+Example output on failure:
+
+```json
+{
+  "execution_result": {
+    "type": "Incomplete",
+    "value": {
+      "used": { "ref_time": 1690000, "proof_size": 0 },
+      "error": { "type": "Barrier", "value": null }
+    }
+  }
+}
+```
+
+Further details are available in the [Dry Run Call](https://docs.polkadot.com/develop/interoperability/xcm-runtime-apis/#dry-run-call) and [Dry Run XCM](https://docs.polkadot.com/develop/interoperability/xcm-runtime-apis/#dry-run-xcm) documentation.
+
+---
+
+## 🪪 Licence
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
