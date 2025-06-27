@@ -2,7 +2,7 @@ endpoint: wss://polkadot-asset-hub-rpc.polkadot.io
 mock-signature-host: true
 block: ${env.POLKADOT_ASSET_HUB_BLOCK_NUMBER}
 db: ./db.sqlite
-wasm-override: wasms/asset_hub_polkadot_runtime.compact.compressed.wasm
+wasm-override: wasms/asset_hub_polkadot_runtime.wasm
 
 import-storage:
   System:

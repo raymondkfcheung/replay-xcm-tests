@@ -31,7 +31,7 @@ case "${TARGET_RUNTIME_ARG}" in
         ;;
 esac
 
-WASM_FILENAME="${CARGO_PACKAGE//-/_}.compact.compressed.wasm" # e.g., polkadot-runtime -> polkadot_runtime
+WASM_FILENAME="${CARGO_PACKAGE//-/_}.wasm" # e.g., polkadot-runtime -> polkadot_runtime
 OVERRIDE_CONFIG_FILE="${CONFIGS_DIR}/${CHOPSTICKS_CONFIG_BASENAME}-override.yaml"
 
 echo "--- Setting up ${TARGET_RUNTIME_ARG} runtime and Chopsticks configuration ---"
@@ -65,7 +65,7 @@ if ! cargo build -p "${CARGO_PACKAGE}"; then
     echo ""
     echo "Please ensure '${TARGET_RUNTIME_ARG}' corresponds to a valid *polkadot-fellows* runtime package."
     echo "For custom or other runtimes (e.g., from different repositories), you may need to manually build the runtime WASM"
-    echo "and then copy the '*.compact.compressed.wasm' file into the ${WASM_DIR} folder."
+    echo "and then copy the '*.wasm' file into the ${WASM_DIR} folder."
     exit 1
 fi
 echo "${TARGET_RUNTIME_ARG} runtime built successfully."
