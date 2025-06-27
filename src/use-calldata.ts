@@ -1,5 +1,5 @@
 import { assetHub } from "@polkadot-api/descriptors";
-import { Binary, createClient } from "polkadot-api";
+import { Binary, createClient, Transaction } from "polkadot-api";
 import { getWsProvider } from "polkadot-api/ws-provider/web";
 import { getPolkadotSigner } from "polkadot-api/signer";
 import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat";
@@ -32,7 +32,7 @@ async function main() {
     const callData = Binary.fromHex(
         "0x1f0803010100411f0300010100fc39fcf04a8071b7409823b7c82427ce67910c6ed80aa0e5093aff234624c8200304000002043205011f0092e81d790000000000"
     );
-    const tx = await api.txFromCallData(callData);
+    const tx: Transaction<any, string, string, any> = await api.txFromCallData(callData);
     console.log("Executing XCM:", JSON.stringify(tx.decodedCall, toHuman, 2));
 
     await new Promise<void>((resolve) => {
