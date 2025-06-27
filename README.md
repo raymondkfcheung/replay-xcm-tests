@@ -6,6 +6,7 @@ This tutorial focuses specifically on replaying [XCMs](https://docs.polkadot.com
 
 * [Debugging cross-chain message failures](https://docs.polkadot.com/develop/interoperability/test-and-debug/)
 * Tracing execution across relay chains and parachains
+* Using [XCM Runtime APIs](https://docs.polkadot.com/develop/interoperability/xcm-runtime-apis/)
 * Analysing weight usage, error types, and message flow
 
 ## Getting Started
@@ -78,6 +79,12 @@ npx ts-node src/set-topic.ts
 
 ```bash
 npx ts-node src/use-calldata.ts
+```
+
+* Dry run with calldata
+
+```bash
+npx ts-node src/exec-dry-run.ts
 ```
 
 ## License
