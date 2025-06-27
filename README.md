@@ -11,8 +11,6 @@
 * 🔁 Tracing multi-hop messages and observing forwarded XCMs
 * ⚖️ Analysing weight usage, fee logic, and emitted events via runtime APIs
 
----
-
 ## ⚙️ Setup
 
 Clone this repository using Git:
@@ -33,8 +31,6 @@ Compile the TypeScript code:
 ```bash
 npm run build
 ```
-
----
 
 ## 🚀 Usage
 
@@ -60,8 +56,6 @@ Generate typed API descriptors for your forked chain using [`papi`](https://docs
 ```bash
 npx papi add assetHub -w ws://localhost:8000
 ```
-
----
 
 ### Running the Example Scripts
 
@@ -117,8 +111,6 @@ Example output on failure:
 ```
 
 Further details are available in the [Dry Run Call](https://docs.polkadot.com/develop/interoperability/xcm-runtime-apis/#dry-run-call) and [Dry Run XCM](https://docs.polkadot.com/develop/interoperability/xcm-runtime-apis/#dry-run-xcm) documentation.
-
----
 
 ## 🪪 Licence
 
