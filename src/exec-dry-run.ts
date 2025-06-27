@@ -5,6 +5,8 @@ import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat";
 import { Keyring } from "@polkadot/keyring";
 import { cryptoWaitReady } from "@polkadot/util-crypto";
 
+const XCM_VERSION = 5;
+
 const toHuman = (_key: any, value: any) => {
     if (typeof value === 'bigint') {
         return Number(value);
@@ -34,7 +36,7 @@ async function main() {
     console.log("Executing XCM:", JSON.stringify(tx.decodedCall, toHuman, 2));
 
     const origin = Enum("system", Enum("Signed", alice.address));
-    const dryRunResult: any = await api.apis.DryRunApi.dry_run_call(origin, tx.decodedCall, 5);
+    const dryRunResult: any = await api.apis.DryRunApi.dry_run_call(origin, tx.decodedCall, XCM_VERSION);
     const {
         execution_result: executionResult,
         emitted_events: emmittedEvents,
