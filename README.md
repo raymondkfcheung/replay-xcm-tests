@@ -87,26 +87,31 @@ npx ts-node src/exec-dry-run.ts
 
 Example output on success:
 
-```json
+```console
 {
-  "execution_result": { "success": true, "value": { ... } },
-  "emitted_events": [ ... ],
-  "local_xcm": { ... },
-  "forwarded_xcms": [ ... ]
+  execution_result: {
+    success: true,
+    value: { ... }
+  },
+  emitted_events: [ ... ],
+  local_xcm: { ... },
+  forwarded_xcms: [ ... ]
 }
 ```
 
 Example output on failure:
 
-```json
+```console
 {
-  "execution_result": {
-    "type": "Incomplete",
-    "value": {
-      "used": { "ref_time": 1690000, "proof_size": 0 },
-      "error": { "type": "Barrier", "value": null }
+  execution_result: {
+    type: 'Incomplete',
+    value: {
+      used: { ref_time: 1690000n, proof_size: 0n },
+      error: { type: 'Barrier', value: undefined }
     }
-  }
+  },
+  emitted_events: [],
+  forwarded_xcms: []
 }
 ```
 
