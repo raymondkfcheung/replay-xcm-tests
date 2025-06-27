@@ -54,9 +54,9 @@ else
 fi
 
 cd "${RUNTIMES_DIR}"
-echo "Running cargo build --release -p ${CARGO_PACKAGE}..."
+echo "Running cargo build -p ${CARGO_PACKAGE}..."
 # Execute cargo build and capture its exit status
-if ! cargo build --release -p "${CARGO_PACKAGE}"; then
+if ! cargo build -p "${CARGO_PACKAGE}"; then
     echo "" # Add an empty line for readability
     echo "ERROR: Failed to build the Rust package '${CARGO_PACKAGE}'."
     echo "This usually means: "
