@@ -1,6 +1,6 @@
 # 🛰️ Replay XCMs Using Chopsticks
 
-[Chopsticks](https://github.com/AcalaNetwork/chopsticks) is a tool for forking live Polkadot SDK-based chains in a local environment. This project demonstrates how to **replay and debug XCMs** locally using Chopsticks, [Polkadot-API](https://docs.polkadot.com/develop/toolkit/api-libraries/papi/), and the [XCM Runtime APIs](https://docs.polkadot.com/develop/interoperability/xcm-runtime-apis/).
+[Chopsticks](https://github.com/AcalaNetwork/chopsticks) is a tool for forking live [Polkadot SDK](https://github.com/paritytech/polkadot-sdk)-based chains in a local environment. This project demonstrates how to **replay and debug XCMs** locally using Chopsticks, [Polkadot-API](https://docs.polkadot.com/develop/toolkit/api-libraries/papi/), and the [XCM Runtime APIs](https://docs.polkadot.com/develop/interoperability/xcm-runtime-apis/).
 
 📘 If you’re unfamiliar with Chopsticks, start with the [Get Started guide](https://docs.polkadot.com/develop/toolkit/parachains/fork-chains/chopsticks/get-started/).
 
