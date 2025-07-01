@@ -63,14 +63,6 @@ Helps trace XCMs with a consistent topic ID:
 npx ts-node src/set-topic.ts
 ```
 
-#### 🧬 Replay Using Call Data
-
-Replays an encoded call captured from Subscan:
-
-```bash
-npx ts-node src/use-calldata.ts
-```
-
 #### 🧪 Dry Run the XCM
 
 Simulates execution of the XCM without affecting state. This outputs execution success, emitted events, and forwarded messages:
@@ -100,7 +92,10 @@ Example output on failure:
   execution_result: {
     success: false,
     value: {
-      post_info: { ... },
+      post_info: {
+        actual_weight: undefined,
+        pays_fee: { type: 'Yes', value: undefined }
+      },
       error: {
         type: 'Module',
         value: {
@@ -117,6 +112,14 @@ Example output on failure:
 ```
 
 Further details are available in the [Dry Run Call](https://docs.polkadot.com/develop/interoperability/xcm-runtime-apis/#dry-run-call) and [Dry Run XCM](https://docs.polkadot.com/develop/interoperability/xcm-runtime-apis/#dry-run-xcm) documentation.
+
+#### 🧬 Replay Using Call Data
+
+Replays an encoded call captured from Subscan:
+
+```bash
+npx ts-node src/use-calldata.ts
+```
 
 ## 🪪 Licence
 
