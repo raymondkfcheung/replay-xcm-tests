@@ -10,10 +10,16 @@ REPLAY_XCM_TESTS_DIR="${PROJECTS_DIR}/replay-xcm-tests"
 RUNTIMES_DIR="${PROJECTS_DIR}/runtimes"
 WASM_DIR="${REPLAY_XCM_TESTS_DIR}/wasms"
 CONFIGS_DIR="${REPLAY_XCM_TESTS_DIR}/configs"
+RUNTIME_REPO="polkadot-fellows/runtimes"
 CHOPSTICKS_CONFIG_REPO_BASE="https://raw.githubusercontent.com/AcalaNetwork/chopsticks/master/configs"
 
 # --- Parse Arguments and Set Defaults ---
 TARGET_RUNTIME_ARG="${1:-asset-hub-polkadot}" # Default to 'asset-hub-polkadot' if no argument is provided
+IS_SDK_ARGS="${2:-false}" # Default to false if not provided
+if [ "${IS_SDK_ARGS}" != "false" ]; then
+    RUNTIMES_DIR="${PROJECTS_DIR}/polkadot-sdk"
+    RUNTIME_REPO="paritytech/polkadot-sdk"
+fi
 
 # Dynamically derive Cargo package name: always append -runtime
 CARGO_PACKAGE="${TARGET_RUNTIME_ARG}-runtime"
@@ -46,8 +52,8 @@ echo "  Override Config Path: ${OVERRIDE_CONFIG_FILE}"
 echo "1. Building ${TARGET_RUNTIME_ARG} runtime..."
 mkdir -p "${PROJECTS_DIR}"
 if [ ! -d "${RUNTIMES_DIR}" ]; then
-    echo "Cloning runtimes repository..."
-    git clone git@github.com:polkadot-fellows/runtimes.git "${RUNTIMES_DIR}"
+    echo "Cloning ${RUNTIME_REPO} repository..."
+    git clone git@github.com:${RUNTIME_REPO}.git "${RUNTIMES_DIR}"
 else
     echo "Runtimes repository already exists. Attempting to pull updates..."
     # Suppress errors for git pull if it fails (e.g., no internet, no new commits)
