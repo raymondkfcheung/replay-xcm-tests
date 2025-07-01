@@ -33,6 +33,12 @@ case "${TARGET_RUNTIME_ARG}" in
     "asset-hub-kusama")
         CHOPSTICKS_CONFIG_BASENAME="kusama-asset-hub"
         ;;
+    "asset-hub-westend")
+        CHOPSTICKS_CONFIG_BASENAME="westend-asset-hub"
+        ;;
+    "bridge-hub-westend")
+        CHOPSTICKS_CONFIG_BASENAME="westend-bridge-hub"
+        ;;
     *) # Default case if no special mapping is found
         CHOPSTICKS_CONFIG_BASENAME="${TARGET_RUNTIME_ARG}"
         ;;
@@ -105,11 +111,6 @@ if [ ! -f "${OVERRIDE_CONFIG_FILE}" ]; then
         echo "Official config found. Downloading ${OVERRIDE_CONFIG_FILE}..."
         wget "${CHOPSTICKS_SOURCE_CONFIG_URL}" -O "${OVERRIDE_CONFIG_FILE}"
         echo "File downloaded. Applying modifications..."
-
-        # Use sed to update wasm-override path
-        # macOS compatible sed -i '' for in-place editing
-        sed -i '' "s|# wasm-override: ${WASM_FILENAME}|wasm-override: wasms/${WASM_FILENAME}|g" "${OVERRIDE_CONFIG_FILE}" || \
-        sed -i '' "s|wasm-override:.*|wasm-override: wasms/${WASM_FILENAME}|g" "${OVERRIDE_CONFIG_FILE}" # Fallback for already uncommented or different values
         
         # Ensure runtime-log-level: 5 is present/set.
         if ! grep -q "^runtime-log-level:" "${OVERRIDE_CONFIG_FILE}"; then
@@ -118,6 +119,16 @@ if [ ! -f "${OVERRIDE_CONFIG_FILE}" ]; then
         else
             echo "Updating runtime-log-level to 5"
             sed -i '' "s/^runtime-log-level:.*$/runtime-log-level: 5/g" "${OVERRIDE_CONFIG_FILE}"
+        fi
+
+        # Ensure wasm-override: wasms/<WASM_FILENAME> is present/set.
+        if ! grep -q "^wasm-override:" "${OVERRIDE_CONFIG_FILE}"; then
+            echo "Adding wasm-override: wasms/${WASM_FILENAME}"
+            echo "wasm-override: wasms/${WASM_FILENAME}" >> "${OVERRIDE_CONFIG_FILE}"
+        else
+            echo "Updating wasm-override to wasms/${WASM_FILENAME}"
+            sed -i '' "s|# wasm-override: ${WASM_FILENAME}|wasm-override: wasms/${WASM_FILENAME}|g" "${OVERRIDE_CONFIG_FILE}" || \
+            sed -i '' "s|wasm-override:.*|wasm-override: wasms/${WASM_FILENAME}|g" "${OVERRIDE_CONFIG_FILE}" # Fallback for already uncommented or different values
         fi
 
         echo "${OVERRIDE_CONFIG_FILE} configured successfully."
