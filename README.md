@@ -55,12 +55,12 @@ npx papi add assetHub -w ws://localhost:8000
 
 Once descriptors are available, the following scripts may be executed:
 
-#### 🔖 Set an XCM Topic
+#### 🧬 Replay Using Call Data
 
-Helps trace XCMs with a consistent topic ID:
+Replays an encoded call captured from Subscan:
 
 ```bash
-npx ts-node src/set-topic.ts
+npx ts-node src/use-calldata.ts
 ```
 
 #### 🧪 Dry Run the XCM
@@ -113,12 +113,12 @@ Example output on failure:
 
 Further details are available in the [Dry Run Call](https://docs.polkadot.com/develop/interoperability/xcm-runtime-apis/#dry-run-call) and [Dry Run XCM](https://docs.polkadot.com/develop/interoperability/xcm-runtime-apis/#dry-run-xcm) documentation.
 
-#### 🧬 Replay Using Call Data
+#### 🔖 Set an XCM Topic
 
-Replays an encoded call captured from Subscan:
+Helps trace XCMs with a consistent topic ID:
 
 ```bash
-npx ts-node src/use-calldata.ts
+npx ts-node src/set-topic.ts
 ```
 
 ## 🪪 Licence
