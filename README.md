@@ -26,12 +26,6 @@ Install the required dependencies:
 npm install
 ```
 
-Compile the TypeScript code:
-
-```bash
-npm run build
-```
-
 ## 🚀 Usage
 
 ### Running Local Chains with Chopsticks
