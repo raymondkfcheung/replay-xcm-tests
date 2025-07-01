@@ -65,7 +65,7 @@ npx ts-node src/use-calldata.ts
 
 #### 🧪 Dry Run the XCM
 
-Simulates execution of the XCM without affecting state. This outputs execution success, emitted events, and forwarded messages:
+Simulates execution of the XCM without affecting state:
 
 ```bash
 npx ts-node src/exec-dry-run.ts
