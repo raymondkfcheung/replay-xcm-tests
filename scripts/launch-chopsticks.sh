@@ -3,8 +3,11 @@
 # Exit immediately if a command exits with a non-zero status.
 set -e
 
-# --- Define Directories ---
-CONFIGS_DIR="configs" # Assuming this script is run from the project root
+# --- Define Project Directories ---
+THIS_DIR=$(cd $(dirname $0); pwd)
+PROJECTS_DIR="${THIS_DIR}/../.."
+REPLAY_XCM_TESTS_DIR="${PROJECTS_DIR}/replay-xcm-tests"
+CONFIGS_DIR="${REPLAY_XCM_TESTS_DIR}/configs"
 
 # --- Function to get override config path ---
 # Checks if an override config exists, otherwise returns the chain name directly

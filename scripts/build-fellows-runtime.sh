@@ -4,7 +4,8 @@
 set -e
 
 # --- Define Project Directories ---
-PROJECTS_DIR="${HOME}/projects"
+THIS_DIR=$(cd $(dirname $0); pwd)
+PROJECTS_DIR="${THIS_DIR}/../.."
 REPLAY_XCM_TESTS_DIR="${PROJECTS_DIR}/replay-xcm-tests"
 RUNTIMES_DIR="${PROJECTS_DIR}/runtimes"
 WASM_DIR="${REPLAY_XCM_TESTS_DIR}/wasms"
@@ -12,7 +13,7 @@ CONFIGS_DIR="${REPLAY_XCM_TESTS_DIR}/configs"
 CHOPSTICKS_CONFIG_REPO_BASE="https://raw.githubusercontent.com/AcalaNetwork/chopsticks/master/configs"
 
 # --- Parse Arguments and Set Defaults ---
-TARGET_RUNTIME_ARG="${1:-polkadot}" # Default to 'polkadot' if no argument is provided
+TARGET_RUNTIME_ARG="${1:-asset-hub-polkadot}" # Default to 'asset-hub-polkadot' if no argument is provided
 
 # Dynamically derive Cargo package name: always append -runtime
 CARGO_PACKAGE="${TARGET_RUNTIME_ARG}-runtime"

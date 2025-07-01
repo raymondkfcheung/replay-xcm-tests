@@ -104,13 +104,20 @@ Example output on failure:
 ```console
 {
   execution_result: {
-    type: 'Incomplete',
+    success: false,
     value: {
-      used: { ref_time: 1690000n, proof_size: 0n },
-      error: { type: 'Barrier', value: undefined }
+      post_info: { ... },
+      error: {
+        type: 'Module',
+        value: {
+          type: 'PolkadotXcm',
+          value: { type: 'LocalExecutionIncomplete', value: undefined }
+        }
+      }
     }
   },
   emitted_events: [],
+  local_xcm: undefined,
   forwarded_xcms: []
 }
 ```
