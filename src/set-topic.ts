@@ -3,8 +3,9 @@ import { Binary, createClient, Enum } from "polkadot-api";
 import { getWsProvider } from "polkadot-api/ws-provider/web";
 import { getPolkadotSigner } from "polkadot-api/signer";
 import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat";
-import { Keyring } from "@polkadot/keyring";
-import { blake2AsHex, cryptoWaitReady } from "@polkadot/util-crypto";
+import { DEV_PHRASE, entropyToMiniSecret, mnemonicToEntropy } from "@polkadot-labs/hdkd-helpers";
+import { sr25519CreateDerive } from "@polkadot-labs/hdkd";
+import { blake2AsHex } from "@polkadot/util-crypto";
 
 const toHuman = (_key: any, value: any) => {
     if (typeof value === 'bigint') {
@@ -19,14 +20,14 @@ const toHuman = (_key: any, value: any) => {
 };
 
 async function main() {
-    await cryptoWaitReady();
-
     const provider = withPolkadotSdkCompat(getWsProvider("ws://localhost:8000"));
     const client = createClient(provider);
     const api = client.getTypedApi(assetHub);
 
-    const keyring = new Keyring({ type: "sr25519" });
-    const alice = keyring.addFromUri("//Alice");
+    const entropy = mnemonicToEntropy(DEV_PHRASE);
+    const miniSecret = entropyToMiniSecret(entropy);
+    const derive = sr25519CreateDerive(miniSecret);
+    const alice = derive("//Alice");
     const aliceSigner = getPolkadotSigner(alice.publicKey, "Sr25519", alice.sign);
 
     const message: AssetHubCalls['PolkadotXcm']['execute']['message'] = Enum("V5", [

@@ -22,10 +22,11 @@
   },
   "homepage": "https://github.com/raymondkfcheung/replay-xcm-tests#readme",
   "dependencies": {
+    "@paraspell/sdk": "^10.9.0",
     "@polkadot-api/descriptors": "file:.papi/descriptors",
     "@polkadot-labs/hdkd": "^0.0.19",
     "@polkadot/api": "^16.2.2",
-    "polkadot-api": "^1.14.0"
+    "polkadot-api": "^1.14.1"
   },
   "devDependencies": {
     "@types/node": "^24.0.3",
