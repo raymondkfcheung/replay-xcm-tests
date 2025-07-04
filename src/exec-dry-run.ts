@@ -1,9 +1,9 @@
-import { assetHub, XcmVersionedXcm } from "@polkadot-api/descriptors";
 import { Binary, createClient, Enum, Transaction } from "polkadot-api";
-import { getWsProvider } from "polkadot-api/ws-provider/web";
 import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat";
-import { Keyring } from "@polkadot/keyring";
-import { cryptoWaitReady } from "@polkadot/util-crypto";
+import { getWsProvider } from "polkadot-api/ws-provider/web";
+import { assetHub, XcmVersionedXcm } from "@polkadot-api/descriptors";
+import { sr25519CreateDerive } from "@polkadot-labs/hdkd";
+import { DEV_PHRASE, entropyToMiniSecret, mnemonicToEntropy, ss58Address } from "@polkadot-labs/hdkd-helpers";
 
 const XCM_VERSION = 5;
 
@@ -20,14 +20,15 @@ const toHuman = (_key: any, value: any) => {
 };
 
 async function main() {
-    await cryptoWaitReady();
-
     const provider = withPolkadotSdkCompat(getWsProvider("ws://localhost:8000"));
     const client = createClient(provider);
     const api = client.getTypedApi(assetHub);
 
-    const keyring = new Keyring({ type: "sr25519" });
-    const alice = keyring.addFromUri("//Alice");
+    const entropy = mnemonicToEntropy(DEV_PHRASE);
+    const miniSecret = entropyToMiniSecret(entropy);
+    const derive = sr25519CreateDerive(miniSecret);
+    const alice = derive("//Alice");
+    const aliceAddress = ss58Address(alice.publicKey);
 
     const callData = Binary.fromHex(
         "0x1f0803010100411f0300010100fc39fcf04a8071b7409823b7c82427ce67910c6ed80aa0e5093aff234624c8200304000002043205011f0092e81d790000000000"
@@ -36,7 +37,7 @@ async function main() {
     const call = tx.decodedCall as any;
     console.log("Executing XCM:", JSON.stringify(call, toHuman, 2));
 
-    const origin = Enum("system", Enum("Signed", alice.address));
+    const origin = Enum("system", Enum("Signed", aliceAddress));
     const dryRunResult: any = await api.apis.DryRunApi.dry_run_call(origin, call, XCM_VERSION);
     const {
         execution_result: executionResult,
