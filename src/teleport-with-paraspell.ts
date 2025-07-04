@@ -10,7 +10,7 @@ import { sr25519CreateDerive } from "@polkadot-labs/hdkd";
 import { exit } from "process";
 
 const toHuman = (_key: any, value: any) => {
-    if (typeof value === 'bigint') {
+    if (typeof value === "bigint") {
         return Number(value);
     }
 

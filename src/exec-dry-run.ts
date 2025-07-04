@@ -8,7 +8,7 @@ import { DEV_PHRASE, entropyToMiniSecret, mnemonicToEntropy, ss58Address } from 
 const XCM_VERSION = 5;
 
 const toHuman = (_key: any, value: any) => {
-    if (typeof value === 'bigint') {
+    if (typeof value === "bigint") {
         return Number(value);
     }
 
