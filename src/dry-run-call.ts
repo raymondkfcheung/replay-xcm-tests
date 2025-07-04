@@ -1,4 +1,3 @@
-
 import { Binary, createClient, Enum } from "polkadot-api";
 import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat";
 import { getWsProvider } from "polkadot-api/ws-provider/web";

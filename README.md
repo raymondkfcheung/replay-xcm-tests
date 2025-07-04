@@ -55,12 +55,12 @@ npx papi add assetHub -w ws://localhost:8000
 
 Once descriptors are available, the following scripts may be executed:
 
-#### 🧬 Replay Using Call Data
+#### 🧬 Replay the XCM Using Call Data
 
 Replays an encoded call captured from Subscan:
 
 ```bash
-npx ts-node src/use-calldata.ts
+npx ts-node src/replay-xcm.ts
 ```
 
 #### 🧪 Dry Run the XCM
@@ -68,7 +68,7 @@ npx ts-node src/use-calldata.ts
 Simulates execution of the XCM without affecting state:
 
 ```bash
-npx ts-node src/exec-dry-run.ts
+npx ts-node src/dry-run-call.ts
 ```
 
 Example output on success:
