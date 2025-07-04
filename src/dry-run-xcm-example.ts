@@ -32,13 +32,13 @@ async function main() {
     const userPublicKey = alice.publicKey;
     const idBeneficiary = Binary.fromBytes(userPublicKey);
 
-    // Define the origin
+    // Define the Origin
     const origin = XcmVersionedLocation.V3({
         parents: 1,
         interior: XcmV3Junctions.Here(),
     });
 
-    // Define a xcm message comming from the Paseo relay chain to Asset Hub to Teleport some tokens
+    // Define a XCM comming from the Relay Chain to Asset Hub to Teleport some tokens
     const xcm = XcmVersionedXcm.V3([
         XcmV3Instruction.ReceiveTeleportedAsset([
             {
@@ -76,13 +76,13 @@ async function main() {
         }),
     ]);
 
-    // Execute dry run xcm
+    // Execute Dry Run XCM
     const dryRunResult = await assetHubApi.apis.DryRunApi.dry_run_xcm(
         origin,
         xcm,
     );
 
-    // Print the results
+    // Print the Results
     console.dir(dryRunResult.value, { depth: null });
 
     client.destroy();
