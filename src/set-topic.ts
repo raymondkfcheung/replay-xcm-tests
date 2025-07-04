@@ -1,11 +1,10 @@
-import { assetHub, AssetHubCalls, XcmV5Instruction, XcmV5Junction, XcmV5Junctions } from "@polkadot-api/descriptors";
 import { Binary, createClient, Enum } from "polkadot-api";
-import { getWsProvider } from "polkadot-api/ws-provider/web";
-import { getPolkadotSigner } from "polkadot-api/signer";
 import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat";
+import { getPolkadotSigner } from "polkadot-api/signer";
+import { getWsProvider } from "polkadot-api/ws-provider/web";
+import { assetHub, AssetHubCalls, XcmV5Instruction, XcmV5Junction, XcmV5Junctions } from "@polkadot-api/descriptors";
 import { DEV_PHRASE, entropyToMiniSecret, mnemonicToEntropy } from "@polkadot-labs/hdkd-helpers";
 import { sr25519CreateDerive } from "@polkadot-labs/hdkd";
-import { blake2AsHex } from "@polkadot/util-crypto";
 
 const toHuman = (_key: any, value: any) => {
     if (typeof value === 'bigint') {
@@ -34,7 +33,7 @@ async function main() {
         XcmV5Instruction.DescendOrigin(
             XcmV5Junctions.X1(XcmV5Junction.AccountId32({ id: Binary.fromBytes(alice.publicKey) }))
         ),
-        XcmV5Instruction.SetTopic(Binary.fromHex(blake2AsHex("replay-xcm-tests-topic", 256))),
+        XcmV5Instruction.SetTopic(Binary.fromHex("0xd60225f721599cb7c6e23cdf4fab26f205e30cd7eb6b5ccf6637cdc80b2339b2")),
     ]);
     const weight: any = await api.apis.XcmPaymentApi.query_xcm_weight(message);
     if (weight.success !== true) {
