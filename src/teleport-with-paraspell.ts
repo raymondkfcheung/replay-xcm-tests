@@ -35,6 +35,8 @@ teleport();
 async function teleport() {
     // We build a signer.
     const signer = getSigner();
+    const userAddress = ss58Address(signer.publicKey);
+
     // We build the teleport transaction.
     const tx = await Builder([WESTEND_AH_RPC])
         .from("AssetHubPolkadot")
@@ -45,8 +47,9 @@ async function teleport() {
         // If using Polkadot you only need to change the units.
         .currency({ symbol: "DOT", amount: 10n * WND_UNITS })
         // To the same address on the different chain.
-        .address(ss58Address(signer.publicKey))
+        .address(userAddress)
         .build();
+    console.log("👀 Executing XCM:", JSON.stringify(tx.decodedCall, toHuman, 2));
 
     // Sign the tx and submit it.
     const result: any = await tx.signAndSubmit(signer);

@@ -35,7 +35,7 @@ async function main() {
     );
     const tx: Transaction<any, string, string, any> = await api.txFromCallData(callData);
     const call = tx.decodedCall as any;
-    console.log("Executing XCM:", JSON.stringify(call, toHuman, 2));
+    console.log("👀 Executing XCM:", JSON.stringify(call, toHuman, 2));
 
     const origin = Enum("system", Enum("Signed", aliceAddress));
     const dryRunResult: any = await api.apis.DryRunApi.dry_run_call(origin, call, XCM_VERSION);

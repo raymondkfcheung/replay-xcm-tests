@@ -45,7 +45,7 @@ async function main() {
         message,
         max_weight: weight.value,
     });
-    console.log("Executing XCM:", JSON.stringify(tx.decodedCall, toHuman, 2));
+    console.log("👀 Executing XCM:", JSON.stringify(tx.decodedCall, toHuman, 2));
 
     const ev = await tx.signAndSubmit(aliceSigner);
     console.log(`📦 Finalised in block #${ev.block.number}: ${ev.block.hash}`);
