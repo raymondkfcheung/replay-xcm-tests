@@ -17,3 +17,4 @@ import-storage:
 
 runtime-log-level: 5
 wasm-override: wasms/westend_runtime.wasm
+# wasm-override: wasms/westend_runtime.compact.compressed.wasm

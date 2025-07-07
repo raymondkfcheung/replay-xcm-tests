@@ -13,5 +13,6 @@ import-storage:
           data:
             free: 1000000000000000
 
-wasm-override: wasms/asset_hub_westend_runtime.wasm
 runtime-log-level: 5
+# wasm-override: wasms/asset_hub_westend_runtime.wasm
+wasm-override: wasms/asset_hub_westend_runtime.compact.compressed.wasm
