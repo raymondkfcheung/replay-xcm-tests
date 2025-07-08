@@ -5,7 +5,8 @@ mock-signature-host: true
 block: ${env.POLKADOT_BLOCK_NUMBER}
 db: ./db.sqlite
 runtime-log-level: 5
-wasm-override: wasms/polkadot_runtime.wasm
+# wasm-override: wasms/polkadot_runtime.wasm
+wasm-override: wasms/polkadot_runtime.compact.compressed.wasm
 
 import-storage:
   System:

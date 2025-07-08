@@ -20,4 +20,5 @@ import-storage:
     Asset: [[[21], { supply: 1000000000 }]]
 
 runtime-log-level: 5
-wasm-override: wasms/asset_hub_polkadot_runtime.wasm
+# wasm-override: wasms/asset_hub_polkadot_runtime.wasm
+wasm-override: wasms/asset_hub_polkadot_runtime.compact.compressed.wasm

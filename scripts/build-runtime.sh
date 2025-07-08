@@ -20,6 +20,7 @@ if [ "${IS_SDK_ARGS}" != "false" ]; then
     RUNTIMES_DIR="${PROJECTS_DIR}/polkadot-sdk"
     RUNTIME_REPO="paritytech/polkadot-sdk"
 fi
+CARGO_PROFILE="${3-release}" # Default Cargo profile
 
 # Dynamically derive Cargo package name: always append -runtime
 CARGO_PACKAGE="${TARGET_RUNTIME_ARG}-runtime"
@@ -44,7 +45,12 @@ case "${TARGET_RUNTIME_ARG}" in
         ;;
 esac
 
-WASM_FILENAME="${CARGO_PACKAGE//-/_}.wasm" # e.g., polkadot-runtime -> polkadot_runtime
+WASM_FILENAME="${CARGO_PACKAGE//-/_}.compact.compressed.wasm" # e.g., polkadot-runtime -> polkadot_runtime
+CARGO_FALGS="-p ${CARGO_PACKAGE}"
+if [ "${CARGO_PROFILE}" != "debug" ]; then
+    WASM_FILENAME="${CARGO_PACKAGE//-/_}.wasm"
+    CARGO_FALGS="--${CARGO_PROFILE} ${CARGO_FALGS}"
+fi
 OVERRIDE_CONFIG_FILE="${CONFIGS_DIR}/${CHOPSTICKS_CONFIG_BASENAME}-override.yaml"
 
 echo "--- Setting up ${TARGET_RUNTIME_ARG} runtime and Chopsticks configuration ---"
@@ -67,9 +73,9 @@ else
 fi
 
 cd "${RUNTIMES_DIR}"
-echo "Running cargo build -p ${CARGO_PACKAGE}..."
+echo "Running cargo build ${CARGO_FALGS}..."
 # Execute cargo build and capture its exit status
-if ! cargo build -p "${CARGO_PACKAGE}"; then
+if ! cargo build ${CARGO_FALGS}; then
     echo "" # Add an empty line for readability
     echo "ERROR: Failed to build the Rust package '${CARGO_PACKAGE}'."
     echo "This usually means: "
@@ -84,7 +90,7 @@ fi
 echo "${TARGET_RUNTIME_ARG} runtime built successfully."
 
 # Verify build (this check is still useful after the cargo build check)
-COMPILED_WASM_PATH="target/debug/wbuild/${CARGO_PACKAGE}/${WASM_FILENAME}"
+COMPILED_WASM_PATH="target/${CARGO_PROFILE}/wbuild/${CARGO_PACKAGE}/${WASM_FILENAME}"
 if [ ! -f "${COMPILED_WASM_PATH}" ]; then
     echo "Error: ${WASM_FILENAME} not found at expected path: ${COMPILED_WASM_PATH} after successful build command!"
     echo "This might indicate a problem with the wbuild process or a misconfigured target path."
@@ -99,7 +105,7 @@ cp "${COMPILED_WASM_PATH}" "${WASM_DIR}/${WASM_FILENAME}"
 echo "Wasm copied to ${WASM_DIR}/${WASM_FILENAME}."
 
 # 3. Download and modify a config file for Chopsticks
-echo "3. Configuring Chopsticks ${CHOPSTICKS_CONFIG_BASENAME}.yml..."
+echo "3. Configuring Chopsticks ${CHOPSTICKS_CONFIG_BASENAME}..."
 mkdir -p "${CONFIGS_DIR}"
 
 if [ ! -f "${OVERRIDE_CONFIG_FILE}" ]; then
