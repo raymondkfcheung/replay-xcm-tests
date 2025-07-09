@@ -45,10 +45,10 @@ case "${TARGET_RUNTIME_ARG}" in
         ;;
 esac
 
-WASM_FILENAME="${CARGO_PACKAGE//-/_}.compact.compressed.wasm" # e.g., polkadot-runtime -> polkadot_runtime
+WASM_FILENAME="${CARGO_PACKAGE//-/_}.wasm" # e.g., polkadot-runtime -> polkadot_runtime
 CARGO_FALGS="-p ${CARGO_PACKAGE}"
 if [ "${CARGO_PROFILE}" != "debug" ]; then
-    WASM_FILENAME="${CARGO_PACKAGE//-/_}.wasm"
+    WASM_FILENAME="${CARGO_PACKAGE//-/_}.compact.compressed.wasm"
     CARGO_FALGS="--${CARGO_PROFILE} ${CARGO_FALGS}"
 fi
 OVERRIDE_CONFIG_FILE="${CONFIGS_DIR}/${CHOPSTICKS_CONFIG_BASENAME}-override.yaml"
