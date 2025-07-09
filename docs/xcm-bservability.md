@@ -1,0 +1,75 @@
+# 🔭 XCM Observability
+
+When sending XCMs using `limited_reserve_transfer_assets` (or other calls from the `PolkadotXcm` pallet), two key observability features help trace messages across chains:
+
+* `message_id` – A same hash emitted in `PolkadotXcm.Sent` and `MessageQueue.Processed` events.
+* [`SetTopic`](https://paritytech.github.io/polkadot-sdk/master/staging_xcm/v5/opaque/type.Instruction.html#variant.SetTopic) – An instruction **automatically appended** at the end of XCM programs by the Polkadot SDK runtime. This topic enables better tracking and correlation across hops.
+
+## 🔄 Message Lifecycle
+
+### 1. ✅ Local XCM (on origin chain – e.g., Polkadot Asset Hub)
+
+```json
+{
+  "type": "TransferAsset",
+  "value": {
+    "assets": [...],
+    "beneficiary": {
+      "parents": 1,
+      "interior": {
+        "type": "X1",
+        "value": {
+          "type": "Parachain",
+          "value": 2000
+        }
+      }
+    }
+  }
+}
+```
+
+### 2. 🚀 Forwarded XCM (to destination – e.g., Acala)
+
+The runtime automatically appends a `SetTopic`:
+
+```json
+{
+  "type": "SetTopic",
+  "value": "0x85e46e75d9dbb211da2fb28106028960fdd916fbe9fdda3665ae00403abe2aae"
+}
+```
+
+This forwarded message lands on the destination chain (Acala) and is processed accordingly.
+
+### 🔍 Event Correlation Flow
+
+| Chain              | Event                        | Field        | Description                              |
+| ------------------ | ---------------------------- | ------------ | ---------------------------------------- |
+| Polkadot Asset Hub | `PolkadotXcm.Sent`           | `message_id` | Unique ID of the sent XCM                |
+| Acala              | `MessageQueue.Processed`     | `id`         | Should match the original `message_id`   |
+| Both               | `SetTopic` (in message body) | topic hash   | Used to logically group related messages |
+
+### 🛠 Example: Message Trace Output
+
+```console
+✅ Local dry run successful.
+📦 Finalised on Polkadot Asset Hub in block #9079592
+📣 Last message Sent: 0xb4b8d2c87622cbad983d8f2c92bfe28e12d587e13d15ea4fdabe8f771bf86bce
+📦 Finalised on Acala in block #8826386
+📣 Last message Processed: 0xb4b8d2c87622cbad983d8f2c92bfe28e12d587e13d15ea4fdabe8f771bf86bce
+✅ Message ID matched.
+```
+
+## 🧠 Notes
+
+* The `SetTopic` is always **added at the last position** of the XCM instruction list.
+* You don’t need to add it manually — if you’re using `limited_reserve_transfer_assets` (for instance), it’s handled automatically by the runtime.
+* If you send with `execute`, you can add your custom ID.
+* You can also inject custom topics for developer testing using the `SetTopic` instruction manually if you're crafting raw XCM.
+
+## 📚 References
+
+* [polkadot-sdk#6119 - [XCM] Observability & Debuggability](https://github.com/paritytech/polkadot-sdk/issues/6119)
+* [polkadot-sdk#7234 - Add EventEmitter to XCM Executor](https://github.com/paritytech/polkadot-sdk/pull/7234)
+* [polkadot-sdk#7691 - Ensure Consistent Topic IDs for Traceable Cross-Chain XCM](https://github.com/paritytech/polkadot-sdk/pull/7691)
+* [polkadot-docs#734 - Add Guide: Replay & Dry Run XCMs with Full Logging Using Chopsticks](https://github.com/polkadot-developers/polkadot-docs/pull/734)

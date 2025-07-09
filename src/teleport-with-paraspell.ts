@@ -25,9 +25,7 @@ const toHuman = (_key: any, value: any) => {
 
 // WND has 12 decimals.
 const WND_UNITS = 1_000_000_000_000n;
-// The RPC endpoints to connect to Westend.
-// Not needed if using Polkadot.
-const WESTEND_AH_RPC = "ws://localhost:8000";
+const ASSETHUB_RPC = "ws://localhost:8000";
 
 // Do the actual teleport. We defer the functionality to a function.
 teleport();
@@ -38,7 +36,7 @@ async function teleport() {
     const userAddress = ss58Address(signer.publicKey);
 
     // We build the teleport transaction.
-    const tx = await Builder([WESTEND_AH_RPC])
+    const tx = await Builder([ASSETHUB_RPC])
         .from("AssetHubPolkadot")
         .to("Polkadot")
         // We send 10 WND.
