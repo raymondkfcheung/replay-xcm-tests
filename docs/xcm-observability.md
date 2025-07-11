@@ -141,5 +141,6 @@ This forwarded message lands on the destination chain (Acala) and is processed a
 
 * [polkadot-sdk#6119 - [XCM] Observability & Debuggability](https://github.com/paritytech/polkadot-sdk/issues/6119)
 * [polkadot-sdk#7234 - Add EventEmitter to XCM Executor](https://github.com/paritytech/polkadot-sdk/pull/7234)
+* [polkadot-sdk#7730 - Nest Errors in `pallet-xcm`](https://github.com/paritytech/polkadot-sdk/pull/7730)
 * [polkadot-sdk#7691 - Ensure Consistent Topic IDs for Traceable Cross-Chain XCM](https://github.com/paritytech/polkadot-sdk/pull/7691)
 * [polkadot-docs#734 - Add Guide: Replay & Dry Run XCMs with Full Logging Using Chopsticks](https://github.com/polkadot-developers/polkadot-docs/pull/734)
