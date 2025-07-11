@@ -105,7 +105,13 @@ This forwarded message lands on the destination chain (Acala) and is processed a
         "value": {
           "type": "PolkadotXcm",
           "value": {
-            "type": "LocalExecutionIncomplete"
+            "type": "LocalExecutionIncompleteWithError",
+            "value": {
+              "index": 0,
+              "error": {
+                "type": "FailedToTransactAsset"
+              }
+            }
           }
         }
       }
