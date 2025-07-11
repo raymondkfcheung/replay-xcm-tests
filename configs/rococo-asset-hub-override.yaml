@@ -1,6 +1,6 @@
-endpoint: wss://westend-collectives-rpc.polkadot.io
+endpoint: wss://westend-asset-hub-rpc.polkadot.io
 mock-signature-host: true
-block: ${env.WESTEND_COLLECTIVES_BLOCK_NUMBER}
+block: ${env.ROCOCO_ASSET_HUB_BLOCK_NUMBER}
 db: ./db.sqlite
 
 import-storage:
@@ -14,5 +14,4 @@ import-storage:
             free: 1000000000000000
 
 runtime-log-level: 5
-# wasm-override: wasms/bridge_hub_westend_runtime.wasm
-wasm-override: wasms/bridge_hub_westend_runtime.compact.compressed.wasm
+wasm-override: wasms/asset_hub_rococo_runtime.compact.compressed.wasm

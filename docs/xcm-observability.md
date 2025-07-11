@@ -78,6 +78,52 @@ This forwarded message lands on the destination chain (Acala) and is processed a
 ✅ Message ID matched.
 ```
 
+### 🚨 Failure Event Handling
+
+**Key Point**: When XCM execution fails, the transaction is rolled back, so **no failure events are emitted on-chain**. However, failure information is still accessible through:
+
+#### 🔍 Local Logging
+
+* Failed XCM executions are captured in local node logs
+* To ensure comprehensive logging, refer to the [logging configuration guide](https://github.com/polkadot-developers/polkadot-docs/pull/734)
+* Use appropriate log levels to capture detailed execution failures
+
+#### 📊 **Failure Correlation**
+
+```console
+📦 Dry run result: {
+  "execution_result": {
+    "success": false,
+    "value": {
+      "post_info": {
+        "pays_fee": {
+          "type": "Yes"
+        }
+      },
+      "error": {
+        "type": "Module",
+        "value": {
+          "type": "PolkadotXcm",
+          "value": {
+            "type": "LocalExecutionIncomplete"
+          }
+        }
+      }
+    }
+  },
+  "emitted_events": [],
+  "forwarded_xcms": []
+}
+❌ Local dry run failed!
+```
+
+#### 🛠 Debugging Workflow
+
+1. Check local logs for detailed failure reasons
+2. Use replay (or dry-run with) full logging enabled
+3. Analyse nested errors to identify root cause
+4. No on-chain events will be emitted for failed executions
+
 ## 🧠 Notes
 
 * `SetTopic` is always **appended as the final instruction** in the XCM by the runtime.
