@@ -8,7 +8,15 @@ When sending XCMs using `limited_reserve_transfer_assets` or other calls from th
 
 ## 🔄 Message Lifecycle
 
-### 1. ✅ Local XCM (on origin chain - e.g., Polkadot Asset Hub)
+### ▶️ Execute Sample Script
+
+Assuming you're familiar with how to replay a forked chain using Chopsticks. If not, refer to the [guide](README.md) for setup instructions.
+
+```bash
+npx ts-node src/limited-reserve-transfer-assets.ts
+```
+
+### ✅ Local XCM (on origin chain - e.g., Polkadot Asset Hub)
 
 ```json
 {
@@ -29,7 +37,7 @@ When sending XCMs using `limited_reserve_transfer_assets` or other calls from th
 }
 ```
 
-### 2. 🚀 Forwarded XCM (to destination - e.g., Acala)
+### 🚀 Forwarded XCM (to destination - e.g., Acala)
 
 The runtime automatically appends a `SetTopic`:
 
