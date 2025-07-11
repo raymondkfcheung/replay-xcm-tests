@@ -23,16 +23,7 @@ npx ts-node src/limited-reserve-transfer-assets.ts
   "type": "TransferAsset",
   "value": {
     "assets": [...],
-    "beneficiary": {
-      "parents": 1,
-      "interior": {
-        "type": "X1",
-        "value": {
-          "type": "Parachain",
-          "value": 2000
-        }
-      }
-    }
+    "beneficiary": {...}
   }
 }
 ```
@@ -42,10 +33,27 @@ npx ts-node src/limited-reserve-transfer-assets.ts
 The runtime automatically appends a `SetTopic`:
 
 ```json
-{
-  "type": "SetTopic",
-  "value": "0x85e46e75d9dbb211da2fb28106028960fdd916fbe9fdda3665ae00403abe2aae"
-}
+[
+  {
+    "type": "ReserveAssetDeposited",
+    "value": [...]
+  },
+  {
+    "type": "ClearOrigin"
+  },
+  {
+    "type": "BuyExecution",
+    "value": {...}
+  },
+  {
+    "type": "DepositAsset",
+    "value": {...}
+  },
+  {
+    "type": "SetTopic",
+    "value": "0x85e46e75d9dbb211da2fb28106028960fdd916fbe9fdda3665ae00403abe2aae"
+  }
+]
 ```
 
 This forwarded message lands on the destination chain (Acala) and is processed accordingly.
@@ -61,10 +69,10 @@ This forwarded message lands on the destination chain (Acala) and is processed a
 
 ```console
 ✅ Local dry run successful.
-📦 Finalised on Polkadot Asset Hub in block #9079592
-📣 Last message Sent: 0xb4b8d2c87622cbad983d8f2c92bfe28e12d587e13d15ea4fdabe8f771bf86bce
-📦 Finalised on Acala in block #8826386
-📣 Last message Processed: 0xb4b8d2c87622cbad983d8f2c92bfe28e12d587e13d15ea4fdabe8f771bf86bce
+📦 Finalised on Polkadot Asset Hub in block #9079592: 0x6de0cd268f07ec040a69dbbcb81f86c6fc4954dfa7fc914edd5dae1e3f235083
+📣 Last message Sent on Polkadot Asset Hub: 0xb4b8d2c87622cbad983d8f2c92bfe28e12d587e13d15ea4fdabe8f771bf86bce
+📦 Finalised on Acala in block #8826386: 0xfda51e7e411ee59c569fc051ef51431b04edebcc5d45d7b1d1bdfcce9627638a
+📣 Last message Processed on Acala: 0xb4b8d2c87622cbad983d8f2c92bfe28e12d587e13d15ea4fdabe8f771bf86bce
 ✅ Message ID matched.
 ```
 
