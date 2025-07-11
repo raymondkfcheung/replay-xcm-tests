@@ -2,10 +2,9 @@
 
 When sending XCMs using `limited_reserve_transfer_assets` or other calls from the `PolkadotXcm` pallet, two observability features help trace and correlate messages across chains:
 
-* **`message_id`** – A hash that appears in both the [`PolkadotXcm.Sent`](https://paritytech.github.io/polkadot-sdk/master/pallet_xcm/pallet/enum.Event.html#variant.Sent) event (on the origin chain) and the [`MessageQueue.Processed`](https://paritytech.github.io/polkadot-sdk/master/pallet_message_queue/pallet/enum.Event.html#variant.Processed) event (on the destination chain). While this ID is not globally unique, it is sufficient to **correlate a Sent message with its corresponding Processed result**.
-* [`SetTopic`](https://paritytech.github.io/polkadot-sdk/master/staging_xcm/v5/opaque/type.Instruction.html#variant.SetTopic) – An XCM instruction that sets a *topic* for the message, automatically appended by the runtime to the end of the XCM. This enables logical grouping or filtering of related XCMs across multiple hops.
-
+* [`SetTopic`](https://paritytech.github.io/polkadot-sdk/master/staging_xcm/v5/opaque/type.Instruction.html#variant.SetTopic) – An XCM instruction that sets a *topic* for the message, automatically appended by the runtime to the end of the XCM. This uses as `message_id`, enables logical grouping or filtering of related XCMs across multiple hops.
   > ⚠️ **Note**: The 32-byte topic is **not guaranteed to be unique** — it's up to the message creator to ensure uniqueness if needed.
+* **`message_id`** – A hash that appears in both the [`PolkadotXcm.Sent`](https://paritytech.github.io/polkadot-sdk/master/pallet_xcm/pallet/enum.Event.html#variant.Sent) event (on the origin chain) and the [`MessageQueue.Processed`](https://paritytech.github.io/polkadot-sdk/master/pallet_message_queue/pallet/enum.Event.html#variant.Processed) event (on the destination chain). While this ID is not globally unique, it is sufficient to **correlate a Sent message with its corresponding Processed result**.
 
 ## 🔄 Message Lifecycle
 
@@ -47,9 +46,9 @@ This forwarded message lands on the destination chain (Acala) and is processed a
 
 | Chain              | Event                        | Field        | Description                              |
 | ------------------ | ---------------------------- | ------------ | ---------------------------------------- |
-| Polkadot Asset Hub | `PolkadotXcm.Sent`           | `message_id` | Message ID of the sent XCM                |
+| Polkadot Asset Hub | `SetTopic` (in message body) | topic hash   | Used to logically group related messages |
+| Polkadot Asset Hub | `PolkadotXcm.Sent`           | `message_id` | Message ID of the sent XCM               |
 | Acala              | `MessageQueue.Processed`     | `id`         | Should match the original `message_id`   |
-| Both               | `SetTopic` (in message body) | topic hash   | Used to logically group related messages |
 
 ### 🛠 Example: Message Trace Output
 
@@ -65,7 +64,7 @@ This forwarded message lands on the destination chain (Acala) and is processed a
 ## 🧠 Notes
 
 * The `SetTopic` is always **added at the last position** of the XCM instruction list.
-* You don’t need to add it manually — if you’re using `limited_reserve_transfer_assets` (for instance), it’s handled automatically by the runtime.
+* You don't need to add it manually, or if you're using `limited_reserve_transfer_assets` (for instance), it's handled automatically by the runtime.
 * If you send with `execute`, you can add your custom ID.
 * You can also inject custom topics for developer testing using the `SetTopic` instruction manually if you're crafting raw XCM.
 
