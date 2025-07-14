@@ -20,6 +20,12 @@ const toHuman = (_key: any, value: any) => {
     return value;
 };
 
+/*
+# https://polkadot.subscan.io/xcm_message/polkadot-c751c3ebfde143246f10a84cb0892f7dbdabd0c3
+POLKADOT_BLOCK_NUMBER=26875160
+POLKADOT_ASSET_HUB_BLOCK_NUMBER=9274851
+HYDRATION_BLOCK_NUMBER=8336277
+*/
 async function main() {
     const assetHubClient = createClient(
         withPolkadotSdkCompat(getWsProvider("ws://localhost:8000"))
