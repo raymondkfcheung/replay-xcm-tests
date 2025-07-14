@@ -125,10 +125,12 @@ Example:
 
 ## 🧠 Notes
 
-* `SetTopic` is always **appended as the final instruction** in the XCM by the runtime.
-* You do **not** need to include `SetTopic` manually when using standard extrinsics like `limited_reserve_transfer_assets`. The runtime handles this automatically.
-* If you construct and submit XCMs manually using `execute`, you **can specify your own `SetTopic`** to group or identify messages logically.
-* For testing or tracing, you may **inject a custom topic** by adding a `SetTopic([u8; 32])` instruction yourself. This is especially useful when crafting raw XCMs.
+* `SetTopic` is always **appended as the final instruction** by the runtime [if not already present](https://paritytech.github.io/polkadot-sdk/master/staging_xcm_builder/struct.WithUniqueTopic.html).
+* When using high-level extrinsics like `limited_reserve_transfer_assets`, you do **not** need to add `SetTopic` manually. The runtime ensures it's included.
+* If you manually construct XCM using `execute`, you **can include your own `SetTopic([u8; 32])`** to explicitly tag or group a message.
+  * If `SetTopic` is already present, it will **not be overridden**.
+  * Best practice: **Place `SetTopic` at the end** of your instruction list to align with runtime expectations.
+* On **newer runtimes with updated XCM versions**, the same topic is **preserved end-to-end** across all chains involved in a multi-hop transfer. This ensures consistent `message_id` correlation between `Sent` and `Processed` events.
 
 ## 📚 References
 
