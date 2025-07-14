@@ -35,8 +35,10 @@ const toHuman = (_key: any, value: any) => {
     return value;
 };
 
-// https://dev.papi.how/explorer/0xc788a1c9f1a7611210805a90499295d7a2408b0d7108629cad8cac0e3babef39#networkId=polkadot_asset_hub&endpoint=light-client
-// POLKADOT_ASSET_HUB_BLOCK_NUMBER = 9274977
+// https://polkadot.subscan.io/xcm_message/polkadot-21cb2a17fca9e66133c46d2adedbaac07bdf1a08
+// POLKADOT_BLOCK_NUMBER=26875418
+// POLKADOT_ASSET_HUB_BLOCK_NUMBER=9274976
+// HYDRATION_BLOCK_NUMBER=8336534
 async function main() {
     const assetHubClient = createClient(
         withPolkadotSdkCompat(getWsProvider("ws://localhost:8000"))
@@ -56,13 +58,7 @@ async function main() {
     const aliceSigner = getPolkadotSigner(alicePublicKey, "Sr25519", alice.sign);
     const aliceAddress = ss58Address(alicePublicKey);
 
-    const origin = Enum("system", Enum("Signed", aliceAddress))
-    const dest = DotXcmVersionedLocation.V4({
-        parents: 1,
-        interior: XcmV5Junctions.X1(
-            XcmV5Junction.Parachain(2034)
-        )
-    });
+    const origin = Enum("system", Enum("Signed", aliceAddress));
     const reserve = Enum("LocalReserve");
     const assetId = {
         parents: 2,
@@ -70,20 +66,13 @@ async function main() {
             XcmV5Junction.GlobalConsensus(XcmV5NetworkId.Kusama()),
         ),
     };
-    const customXcmOnDest = DotXcmVersionedXcm.V4([
-        XcmV5Instruction.DepositAsset({
-            assets: XcmV5AssetFilter.Wild(XcmV5WildAsset.All()),
-            beneficiary: {
-                parents: ,
-                interior: XcmV5Junctions.X1(
-                    XcmV5Junction.AccountId32({ id: Binary.fromHex("0xa2c0ccb3b953bb79a4109ce8f56d1538bc5ac2d8f428f4531df973bb7e3c7c13") })
-                )
-            }
-        })
-    ]);
-
     const tx: Transaction<any, string, string, any> = assetHubApi.tx.PolkadotXcm.transfer_assets_using_type_and_then({
-        dest,
+        dest: DotXcmVersionedLocation.V4({
+            parents: 1,
+            interior: XcmV5Junctions.X1(
+                XcmV5Junction.Parachain(2034)
+            )
+        }),
         assets: DotXcmVersionedAssets.V4([
             {
                 id: assetId,
@@ -93,7 +82,17 @@ async function main() {
         assets_transfer_type: reserve,
         remote_fees_id: DotXcmVersionedAssetId.V4(assetId),
         fees_transfer_type: reserve,
-        custom_xcm_on_dest: customXcmOnDest,
+        custom_xcm_on_dest: DotXcmVersionedXcm.V4([
+            XcmV5Instruction.DepositAsset({
+                assets: XcmV5AssetFilter.Wild(XcmV5WildAsset.All()),
+                beneficiary: {
+                    parents: 0,
+                    interior: XcmV5Junctions.X1(
+                        XcmV5Junction.AccountId32({ id: Binary.fromHex("0xa2c0ccb3b953bb79a4109ce8f56d1538bc5ac2d8f428f4531df973bb7e3c7c13") })
+                    )
+                }
+            })
+        ]),
         weight_limit: XcmV3WeightLimit.Unlimited(),
     });
     const decodedCall = tx.decodedCall as any;

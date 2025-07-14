@@ -25,6 +25,7 @@
     "@paraspell/sdk": "^10.9.0",
     "@polkadot-api/descriptors": "file:.papi/descriptors",
     "@polkadot-labs/hdkd": "^0.0.19",
+    "@polkadot/api": "^16.4.1",
     "polkadot-api": "^1.14.1"
   },
   "devDependencies": {
