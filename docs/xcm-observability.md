@@ -130,7 +130,7 @@ Example:
 * If you manually construct XCM using `execute`, you **can include your own `SetTopic([u8; 32])`** to explicitly tag or group a message.
   * If `SetTopic` is already present, it will **not be overridden**.
   * Best practice: **Place `SetTopic` at the end** of your instruction list to align with runtime expectations.
-* On **newer runtimes with updated XCM versions**, the same topic is **preserved end-to-end** across all chains involved in a multi-hop transfer. This ensures consistent `message_id` correlation between `Sent` and `Processed` events.
+* On **newer runtimes**, the same topic is **preserved end-to-end** across all chains involved in a multi-hop transfer. This ensures consistent `message_id` correlation between `Sent` and `Processed` events.
 
 ## 📚 References
 
