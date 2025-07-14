@@ -91,7 +91,7 @@ Most indexers will display **nested error information**, such as `LocalExecution
 For **in-depth debugging**, especially when the nested error is vague, use [`Chopsticks`](https://github.com/AcalaNetwork/chopsticks):
 
 * Run a replay with full logging to see **which instruction failed**, and why.
-* View inner `FailedToTransactAsset`, `AssetNotFound` or other details.
+* View inner `FailedToTransactAsset`, `AssetNotFound` or nested error.
 * Supports debugging multi-hop XCMs and complex failure scenarios.
 
 Example:
