@@ -1,17 +1,8 @@
-import { Binary, createClient, Enum } from "polkadot-api";
+import { Binary, createClient, Enum, Transaction } from "polkadot-api";
 import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat";
 import { getPolkadotSigner } from "polkadot-api/signer";
 import { getWsProvider } from "polkadot-api/ws-provider/web";
-import {
-    acala,
-    assetHub,
-    XcmV3MultiassetFungibility,
-    XcmV3WeightLimit,
-    XcmV5Junction,
-    XcmV5Junctions,
-    XcmVersionedAssets,
-    XcmVersionedLocation,
-} from "@polkadot-api/descriptors";
+import { assetHub, hydration } from "@polkadot-api/descriptors";
 import { sr25519CreateDerive } from "@polkadot-labs/hdkd";
 import { DEV_PHRASE, entropyToMiniSecret, mnemonicToEntropy, ss58Address } from "@polkadot-labs/hdkd-helpers";
 
@@ -30,59 +21,30 @@ const toHuman = (_key: any, value: any) => {
 };
 
 async function main() {
-    const acalaClient = createClient(
-        withPolkadotSdkCompat(getWsProvider("ws://localhost:8001"))
-    );
-    const acalaApi = acalaClient.getTypedApi(acala);
-
     const assetHubClient = createClient(
-        withPolkadotSdkCompat(getWsProvider("ws://localhost:8000")),
+        withPolkadotSdkCompat(getWsProvider("ws://localhost:8000"))
     );
     const assetHubApi = assetHubClient.getTypedApi(assetHub);
+
+    const hydrationClient = createClient(
+        withPolkadotSdkCompat(getWsProvider("ws://localhost:8001"))
+    );
+    const hydrationApi = hydrationClient.getTypedApi(hydration);
 
     const entropy = mnemonicToEntropy(DEV_PHRASE);
     const miniSecret = entropyToMiniSecret(entropy);
     const derive = sr25519CreateDerive(miniSecret);
     const alice = derive("//Alice");
-    const userPublicKey = alice.publicKey;
-    const aliceSigner = getPolkadotSigner(userPublicKey, "Sr25519", alice.sign);
-    const aliceAddress = ss58Address(userPublicKey);
-    const idBeneficiary = Binary.fromHex("0xfc39fcf04a8071b7409823b7c82427ce67910c6ed80aa0e5093aff234624c820");
+    const alicePublicKey = alice.publicKey;
+    const aliceSigner = getPolkadotSigner(alicePublicKey, "Sr25519", alice.sign);
+    const aliceAddress = ss58Address(alicePublicKey);
 
     const origin = Enum("system", Enum("Signed", aliceAddress));
-    const tx: any = assetHubApi.tx.PolkadotXcm.limited_reserve_transfer_assets({
-        dest: XcmVersionedLocation.V5({
-            parents: 1,
-            interior: XcmV5Junctions.X1(
-                XcmV5Junction.Parachain(2000),
-            ),
-        }),
-        beneficiary: XcmVersionedLocation.V5({
-            parents: 0,
-            interior: XcmV5Junctions.X1(
-                XcmV5Junction.AccountId32({
-                    network: undefined,
-                    id: idBeneficiary,
-                }),
-            ),
-        }),
-        assets: XcmVersionedAssets.V5([
-            {
-                id: {
-                    parents: 0,
-                    interior: XcmV5Junctions.X2([
-                        XcmV5Junction.PalletInstance(50),
-                        XcmV5Junction.GeneralIndex(1984n),
-                    ]
-                    ),
-                },
-                fun: XcmV3MultiassetFungibility.Fungible(500_000_000n),
-            },
-        ]),
-        fee_asset_item: 0,
-        weight_limit: XcmV3WeightLimit.Unlimited(),
-    });
-    const decodedCall = tx.decodedCall;
+    const callData = Binary.fromHex(
+        "0x1f0804010100c91f0400010100904e6c1bea56405e8ad6ba79eb5f39b0114635c46a22e93c64115dfc0252e12a040401000003009435770000000000"
+    );
+    const tx: Transaction<any, string, string, any> = await assetHubApi.txFromCallData(callData);
+    const decodedCall = tx.decodedCall as any;
     console.log("👀 Executing XCM:", JSON.stringify(decodedCall, toHuman, 2));
 
     const dryRunResult: any = await assetHubApi.apis.DryRunApi.dry_run_call(
@@ -104,7 +66,7 @@ async function main() {
     } else {
         console.log("✅ Local dry run successful.");
 
-        const acalaBlockBefore = await acalaClient.getFinalizedBlock()
+        const hydrationBlockBefore = await hydrationClient.getFinalizedBlock()
 
         const ev = await tx.signAndSubmit(aliceSigner);
         console.log(`📦 Finalised on Polkadot Asset Hub in block #${ev.block.number}: ${ev.block.hash}`);
@@ -125,23 +87,23 @@ async function main() {
             console.log(`📣 Last message Sent on Polkadot Asset Hub: ${sentMessageId}`);
 
             let processedMessageId = undefined
-            const maxRetries = 3;
+            const maxRetries = 8;
             for (let i = 0; i < maxRetries; i++) {
-                const acalaBlockAfter = await acalaClient.getFinalizedBlock()
-                if (acalaBlockAfter.number == acalaBlockBefore.number) {
+                const hydrationBlockAfter = await hydrationClient.getFinalizedBlock()
+                if (hydrationBlockAfter.number == hydrationBlockBefore.number) {
                     const waiting = 1_000 * (i + 1);
-                    console.log(`⏳ Waiting ${waiting}ms for Acala block to be finalised (${i + 1}/${maxRetries})...`);
+                    console.log(`⏳ Waiting ${waiting}ms for Hydration block to be finalised (${i + 1}/${maxRetries})...`);
                     await new Promise(resolve => setTimeout(resolve, waiting));
                     continue;
                 }
 
-                console.log(`📦 Finalised on Acala in block #${acalaBlockAfter.number}: ${acalaBlockAfter.hash}`);
-                const processedEvents = await acalaApi.event.MessageQueue.Processed.pull();
+                console.log(`📦 Finalised on Hydration in block #${hydrationBlockAfter.number}: ${hydrationBlockAfter.hash}`);
+                const processedEvents = await hydrationApi.event.MessageQueue.Processed.pull();
                 if (processedEvents.length > 0) {
                     processedMessageId = processedEvents[0].payload.id.asHex();
-                    console.log(`📣 Last message Processed on Acala: ${processedMessageId}`);
+                    console.log(`📣 Last message Processed on Hydration: ${processedMessageId}`);
                 } else {
-                    console.log("📣 No Processed events on Acala found.");
+                    console.log("📣 No Processed events on Hydration found.");
                 }
 
                 break;
@@ -157,8 +119,8 @@ async function main() {
         }
     }
 
-    acalaClient.destroy();
     assetHubClient.destroy();
+    hydrationClient.destroy();
 }
 
 main().catch(console.error);
