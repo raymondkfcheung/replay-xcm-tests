@@ -61,10 +61,8 @@ async function main() {
     const origin = Enum("system", Enum("Signed", aliceAddress));
     const reserve = Enum("LocalReserve");
     const assetId = {
-        parents: 2,
-        interior: XcmV5Junctions.X1(
-            XcmV5Junction.GlobalConsensus(XcmV5NetworkId.Kusama()),
-        ),
+        parents: 1,
+        interior: XcmV5Junctions.Here(),
     };
     const tx: Transaction<any, string, string, any> = assetHubApi.tx.PolkadotXcm.transfer_assets_using_type_and_then({
         dest: DotXcmVersionedLocation.V4({
