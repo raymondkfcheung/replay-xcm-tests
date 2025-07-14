@@ -80,55 +80,48 @@ This forwarded message lands on the destination chain (Acala) and is processed a
 
 ### 🚨 Failure Event Handling
 
-**Key Point**: When XCM execution fails, the transaction is rolled back, so **no failure events are emitted on-chain**. However, failure information is still accessible through:
+**Important:** When an XCM transaction fails, it is **rolled back**, meaning **no failure events are emitted on-chain**. However, failure details are still observable through other methods.
 
-#### 🔍 Local Logging
+#### 📦 Indexer View: Nested Error Only
 
-* Failed XCM executions are captured in local node logs
-* To ensure comprehensive logging, refer to the [logging configuration guide](https://github.com/polkadot-developers/polkadot-docs/pull/734)
-* Use appropriate log levels to capture detailed execution failures
+Most indexers will display **nested error information**, such as `LocalExecutionIncompleteWithError`. This can be helpful for high-level diagnosis, and is **usually sufficient** to understand what went wrong.
 
-#### 📊 **Failure Correlation**
+#### 🧪 Deeper Insight: Use Chopsticks for Full Detail
 
-```console
-📦 Dry run result: {
-  "execution_result": {
-    "success": false,
+For **in-depth debugging**, especially when the nested error is vague, use [`Chopsticks`](https://github.com/AcalaNetwork/chopsticks):
+
+* Run a replay with full logging to see **which instruction failed**, and why.
+* View inner `FailedToTransactAsset`, `AssetNotFound` or other details.
+* Supports debugging multi-hop XCMs and complex failure scenarios.
+
+Example:
+
+```json
+"error": {
+  "type": "Module",
+  "value": {
+    "type": "PolkadotXcm",
     "value": {
-      "post_info": {
-        "pays_fee": {
-          "type": "Yes"
-        }
-      },
-      "error": {
-        "type": "Module",
-        "value": {
-          "type": "PolkadotXcm",
-          "value": {
-            "type": "LocalExecutionIncompleteWithError",
-            "value": {
-              "index": 0,
-              "error": {
-                "type": "FailedToTransactAsset"
-              }
-            }
-          }
+      "type": "LocalExecutionIncompleteWithError",
+      "value": {
+        "index": 0,
+        "error": {
+          "type": "FailedToTransactAsset"
         }
       }
     }
-  },
-  "emitted_events": [],
-  "forwarded_xcms": []
+  }
 }
-❌ Local dry run failed!
 ```
 
-#### 🛠 Debugging Workflow
+#### 🛠 Recommended Debugging Workflow
 
-1. Check local logs for detailed failure reasons
-2. Use replay (or dry-run with) full logging enabled
-3. Analyse nested errors to identify root cause
-4. No on-chain events will be emitted for failed executions
+1. **Look at the indexer first** to see if the nested error gives enough context.
+2. If not, **run a replay in Chopsticks** with logging enabled.
+3. Check node logs to correlate where and why execution failed.
+4. Analyse inner errors (e.g., weight too low, asset mismatch, missing buy execution).
+
+➡️ For full logging setup, see [this guide](https://github.com/polkadot-developers/polkadot-docs/pull/734).
 
 ## 🧠 Notes
 
