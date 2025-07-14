@@ -9,7 +9,6 @@ import {
     DotXcmVersionedAssets,
     DotXcmVersionedLocation,
     DotXcmVersionedXcm,
-    XcmV3JunctionNetworkId,
     XcmV3MultiassetFungibility,
     XcmV3WeightLimit,
     XcmV5Instruction,
@@ -62,11 +61,9 @@ async function main() {
         )
     });
 
-    const assetHubLocation = Enum("RemoteReserve", DotXcmVersionedLocation.V4({
+    const reserve = Enum("RemoteReserve", DotXcmVersionedLocation.V4({
         parents: 1,
-        interior: XcmV5Junctions.X1(
-            XcmV5Junction.Parachain(1000)
-        )
+        interior: XcmV5Junctions.X1(XcmV5Junction.Parachain(1000)),
     }));
 
     const assetId = {
@@ -86,7 +83,7 @@ async function main() {
             beneficiary: {
                 parents: 1,
                 interior: XcmV5Junctions.X1(
-                    XcmV5Junction.Parachain(1000)
+                    XcmV5Junction.AccountKey20({ key: Binary.fromHex("0x302f0b71b8ad3cf6dd90adb668e49b2168d652fd") })
                 )
             }
         })
@@ -100,9 +97,9 @@ async function main() {
                 fun: XcmV3MultiassetFungibility.Fungible(100_000_000n),
             }
         ]),
-        assets_transfer_type: assetHubLocation,
+        assets_transfer_type: reserve,
         remote_fees_id: DotXcmVersionedAssetId.V4(assetId),
-        fees_transfer_type: assetHubLocation,
+        fees_transfer_type: reserve,
         custom_xcm_on_dest: customXcmOnDest,
         weight_limit: XcmV3WeightLimit.Unlimited(),
     });
