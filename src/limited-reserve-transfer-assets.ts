@@ -77,7 +77,7 @@ async function main() {
                     ]
                     ),
                 },
-                fun: XcmV3MultiassetFungibility.Fungible(508000804n),
+                fun: XcmV3MultiassetFungibility.Fungible(500_000_000n),
             },
         ]),
         fee_asset_item: 0,
