@@ -1,4 +1,4 @@
-import { Binary, createClient, Enum } from "polkadot-api";
+import { Binary, createClient, Enum, Transaction } from "polkadot-api";
 import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat";
 import { getPolkadotSigner } from "polkadot-api/signer";
 import { getWsProvider } from "polkadot-api/ws-provider/web";
@@ -30,27 +30,28 @@ const toHuman = (_key: any, value: any) => {
 };
 
 async function main() {
-    const acalaClient = createClient(
-        withPolkadotSdkCompat(getWsProvider("ws://localhost:8001"))
-    );
-    const acalaApi = acalaClient.getTypedApi(acala);
-
     const assetHubClient = createClient(
-        withPolkadotSdkCompat(getWsProvider("ws://localhost:8000")),
+        withPolkadotSdkCompat(getWsProvider("ws://localhost:8000"))
     );
     const assetHubApi = assetHubClient.getTypedApi(assetHub);
+
+    const parachainName = "Acala";
+    const parachainClient = createClient(
+        withPolkadotSdkCompat(getWsProvider("ws://localhost:8001"))
+    );
+    const parachainApi = parachainClient.getTypedApi(acala);
 
     const entropy = mnemonicToEntropy(DEV_PHRASE);
     const miniSecret = entropyToMiniSecret(entropy);
     const derive = sr25519CreateDerive(miniSecret);
     const alice = derive("//Alice");
-    const userPublicKey = alice.publicKey;
-    const aliceSigner = getPolkadotSigner(userPublicKey, "Sr25519", alice.sign);
-    const aliceAddress = ss58Address(userPublicKey);
+    const alicePublicKey = alice.publicKey;
+    const aliceSigner = getPolkadotSigner(alicePublicKey, "Sr25519", alice.sign);
+    const aliceAddress = ss58Address(alicePublicKey);
     const idBeneficiary = Binary.fromHex("0xfc39fcf04a8071b7409823b7c82427ce67910c6ed80aa0e5093aff234624c820");
 
     const origin = Enum("system", Enum("Signed", aliceAddress));
-    const tx: any = assetHubApi.tx.PolkadotXcm.limited_reserve_transfer_assets({
+    const tx: Transaction<any, string, string, any> = assetHubApi.tx.PolkadotXcm.limited_reserve_transfer_assets({
         dest: XcmVersionedLocation.V5({
             parents: 1,
             interior: XcmV5Junctions.X1(
@@ -82,7 +83,7 @@ async function main() {
         fee_asset_item: 0,
         weight_limit: XcmV3WeightLimit.Unlimited(),
     });
-    const decodedCall = tx.decodedCall;
+    const decodedCall = tx.decodedCall as any;
     console.log("👀 Executing XCM:", JSON.stringify(decodedCall, toHuman, 2));
 
     const dryRunResult: any = await assetHubApi.apis.DryRunApi.dry_run_call(
@@ -104,7 +105,7 @@ async function main() {
     } else {
         console.log("✅ Local dry run successful.");
 
-        const acalaBlockBefore = await acalaClient.getFinalizedBlock()
+        const parachainBlockBefore = await parachainClient.getFinalizedBlock()
 
         const ev = await tx.signAndSubmit(aliceSigner);
         console.log(`📦 Finalised on Polkadot Asset Hub in block #${ev.block.number}: ${ev.block.hash}`);
@@ -125,23 +126,23 @@ async function main() {
             console.log(`📣 Last message Sent on Polkadot Asset Hub: ${sentMessageId}`);
 
             let processedMessageId = undefined
-            const maxRetries = 3;
+            const maxRetries = 8;
             for (let i = 0; i < maxRetries; i++) {
-                const acalaBlockAfter = await acalaClient.getFinalizedBlock()
-                if (acalaBlockAfter.number == acalaBlockBefore.number) {
+                const parachainBlockAfter = await parachainClient.getFinalizedBlock()
+                if (parachainBlockAfter.number == parachainBlockBefore.number) {
                     const waiting = 1_000 * (i + 1);
-                    console.log(`⏳ Waiting ${waiting}ms for Acala block to be finalised (${i + 1}/${maxRetries})...`);
+                    console.log(`⏳ Waiting ${waiting}ms for ${parachainName} block to be finalised (${i + 1}/${maxRetries})...`);
                     await new Promise(resolve => setTimeout(resolve, waiting));
                     continue;
                 }
 
-                console.log(`📦 Finalised on Acala in block #${acalaBlockAfter.number}: ${acalaBlockAfter.hash}`);
-                const processedEvents = await acalaApi.event.MessageQueue.Processed.pull();
+                console.log(`📦 Finalised on ${parachainName} in block #${parachainBlockAfter.number}: ${parachainBlockAfter.hash}`);
+                const processedEvents = await parachainApi.event.MessageQueue.Processed.pull();
                 if (processedEvents.length > 0) {
                     processedMessageId = processedEvents[0].payload.id.asHex();
-                    console.log(`📣 Last message Processed on Acala: ${processedMessageId}`);
+                    console.log(`📣 Last message Processed on ${parachainName}: ${processedMessageId}`);
                 } else {
-                    console.log("📣 No Processed events on Acala found.");
+                    console.log("📣 No Processed events on ${parachainName} found.");
                 }
 
                 break;
@@ -157,8 +158,8 @@ async function main() {
         }
     }
 
-    acalaClient.destroy();
     assetHubClient.destroy();
+    parachainClient.destroy();
 }
 
 main().catch(console.error);

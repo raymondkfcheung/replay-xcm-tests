@@ -14,7 +14,6 @@ import {
     XcmV5Instruction,
     XcmV5Junction,
     XcmV5Junctions,
-    XcmV5NetworkId,
     XcmV5WildAsset,
     XcmV5AssetFilter,
 } from "@polkadot-api/descriptors";
@@ -45,10 +44,11 @@ async function main() {
     );
     const assetHubApi = assetHubClient.getTypedApi(assetHub);
 
-    const hydrationClient = createClient(
+    const parachainName = "Hydration";
+    const parachainClient = createClient(
         withPolkadotSdkCompat(getWsProvider("ws://localhost:8001"))
     );
-    const hydrationApi = hydrationClient.getTypedApi(hydration);
+    const parachainApi = parachainClient.getTypedApi(hydration);
 
     const entropy = mnemonicToEntropy(DEV_PHRASE);
     const miniSecret = entropyToMiniSecret(entropy);
@@ -115,7 +115,7 @@ async function main() {
     } else {
         console.log("✅ Local dry run successful.");
 
-        const hydrationBlockBefore = await hydrationClient.getFinalizedBlock()
+        const parachainBlockBefore = await parachainClient.getFinalizedBlock()
 
         const ev = await tx.signAndSubmit(aliceSigner);
         console.log(`📦 Finalised on Polkadot Asset Hub in block #${ev.block.number}: ${ev.block.hash}`);
@@ -138,21 +138,21 @@ async function main() {
             let processedMessageId = undefined
             const maxRetries = 8;
             for (let i = 0; i < maxRetries; i++) {
-                const hydrationBlockAfter = await hydrationClient.getFinalizedBlock()
-                if (hydrationBlockAfter.number == hydrationBlockBefore.number) {
+                const parachainBlockAfter = await parachainClient.getFinalizedBlock()
+                if (parachainBlockAfter.number == parachainBlockBefore.number) {
                     const waiting = 1_000 * (i + 1);
-                    console.log(`⏳ Waiting ${waiting}ms for Hydration block to be finalised (${i + 1}/${maxRetries})...`);
+                    console.log(`⏳ Waiting ${waiting}ms for ${parachainName} block to be finalised (${i + 1}/${maxRetries})...`);
                     await new Promise(resolve => setTimeout(resolve, waiting));
                     continue;
                 }
 
-                console.log(`📦 Finalised on Hydration in block #${hydrationBlockAfter.number}: ${hydrationBlockAfter.hash}`);
-                const processedEvents = await hydrationApi.event.MessageQueue.Processed.pull();
+                console.log(`📦 Finalised on ${parachainName} in block #${parachainBlockAfter.number}: ${parachainBlockAfter.hash}`);
+                const processedEvents = await parachainApi.event.MessageQueue.Processed.pull();
                 if (processedEvents.length > 0) {
                     processedMessageId = processedEvents[0].payload.id.asHex();
-                    console.log(`📣 Last message Processed on Hydration: ${processedMessageId}`);
+                    console.log(`📣 Last message Processed on ${parachainName}: ${processedMessageId}`);
                 } else {
-                    console.log("📣 No Processed events on Hydration found.");
+                    console.log("📣 No Processed events on ${parachainName} found.");
                 }
 
                 break;
@@ -169,7 +169,7 @@ async function main() {
     }
 
     assetHubClient.destroy();
-    hydrationClient.destroy();
+    parachainClient.destroy();
 }
 
 main().catch(console.error);
