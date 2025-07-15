@@ -133,6 +133,38 @@ Example:
   * Best practice: **Place `SetTopic` at the end** of your instruction list to align with runtime expectations.
 * On **newer runtimes**, the same topic is **preserved end-to-end** across all chains involved in a multi-hop transfer. This ensures consistent `message_id` correlation between `Sent` and `Processed` events.
 
+### 🧩 Workaround for Older Runtimes
+
+* On **older runtimes** (prior to [fix #759](https://github.com/polkadot-fellows/runtimes/pull/759) in `stable2503-5`), the `message_id` seen in downstream `Processed` events is **not the original topic hash**, but rather a **derived `forwarded_id`**.
+* This `forwarded_id` is computed as:
+
+```rust
+use sp_core::H256;
+use std::str::FromStr;
+
+fn forward_id_for(original_id: &XcmHash) -> XcmHash {
+  (b"forward_id_for", original_id).using_encoded(sp_io::hashing::blake2_256)
+}
+```
+
+* To reliably trace messages across **mixed-version chains**, indexers and tools should **check for both `original_id` and its forwarded form**.
+* Reference: [`forward-id-for.ts`](../src/forward-id-for.ts) contains a helper function to compute this.
+
+```ts
+// Create prefixed input: b"forward_id_for" + original_id
+const prefix = stringToU8a("forward_id_for");
+const input = u8aConcat(prefix, messageIdBytes);
+
+// Hash it using blake2_256
+const forwardedIdBytes = blake2AsU8a(input);
+```
+
+* ✅ **New runtimes**:
+  `message_id == original_id`
+
+* ⚠️ **Old runtimes**:
+  `message_id == blake2_256("forward_id_for" + original_id)`
+
 ## 📚 References
 
 * [polkadot-sdk#6119 - [XCM] Observability & Debuggability](https://github.com/paritytech/polkadot-sdk/issues/6119)
