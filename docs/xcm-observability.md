@@ -62,12 +62,18 @@ The runtime automatically appends a `SetTopic`:
 
 This forwarded message lands on the destination chain (Acala) and is processed accordingly.
 
+Here’s an updated version of your section to reflect the current state of XCM message tracking across chains more clearly and accurately:
+
 ### 🔍 Event Correlation Flow
 
-| Chain              | Event                   | Field        | Description                                         |
-| ------------------ | ----------------------- | ------------ | --------------------------------------------------- |
-| Polkadot Asset Hub | `PolkadotXcm.Sent`      | `message_id` | Message ID derived from `SetTopic`                  |
-| Acala              | `MessageQueue.Processed`| `id`         | Should match the `message_id` from the origin chain |
+| Chain                             | Event                    | Field        | Description                                                                |
+| --------------------------------- | ------------------------ | ------------ | -------------------------------------------------------------------------- |
+| Origin (e.g. Asset Hub)           | `PolkadotXcm.Sent`       | `message_id` | Message ID from `SetTopic`. Appended automatically if missing.             |
+| Destination (e.g. Acala, HydraDX) | `MessageQueue.Processed` | `id`         | Matches `message_id` from the origin chain, enabling reliable correlation. |
+
+✅ **These two fields now match** on new runtimes (`stable2503-5` or later).
+
+> ⚠️ Do **not** rely on [`XcmpQueue.XcmpMessageSent`](https://paritytech.github.io/polkadot-sdk/master/cumulus_pallet_xcmp_queue/pallet/enum.Event.html#variant.XcmpMessageSent). Its `message_hash` is **not correlated** with `message_id` and is **not suitable** for cross-chain tracking.
 
 ### 🛠 Example: Message Trace Output
 
