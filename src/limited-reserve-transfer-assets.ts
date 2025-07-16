@@ -48,7 +48,6 @@ async function main() {
     const alicePublicKey = alice.publicKey;
     const aliceSigner = getPolkadotSigner(alicePublicKey, "Sr25519", alice.sign);
     const aliceAddress = ss58Address(alicePublicKey);
-    const idBeneficiary = Binary.fromHex("0xfc39fcf04a8071b7409823b7c82427ce67910c6ed80aa0e5093aff234624c820");
 
     const origin = Enum("system", Enum("Signed", aliceAddress));
     const tx: Transaction<any, string, string, any> = assetHubApi.tx.PolkadotXcm.limited_reserve_transfer_assets({
@@ -62,8 +61,7 @@ async function main() {
             parents: 0,
             interior: XcmV5Junctions.X1(
                 XcmV5Junction.AccountId32({
-                    network: undefined,
-                    id: idBeneficiary,
+                    id: Binary.fromHex("0xfc39fcf04a8071b7409823b7c82427ce67910c6ed80aa0e5093aff234624c820"),
                 }),
             ),
         }),

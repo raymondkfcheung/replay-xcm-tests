@@ -14,7 +14,7 @@ Assuming you're familiar with how to replay a forked chain using [Chopsticks](ht
 
 * [`hydration-sample1.ts`](../src/hydration-sample1.ts)
 * [`limited-reserve-transfer-assets.ts`](../src/limited-reserve-transfer-assets.ts)
-* [multiple-hops.ts](../src/multiple-hops.ts)
+* [`multiple-hops.ts`](../src/multiple-hops.ts)
 
 ```bash
 npx ts-node src/limited-reserve-transfer-assets.ts
