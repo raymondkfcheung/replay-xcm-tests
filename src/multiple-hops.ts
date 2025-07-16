@@ -96,6 +96,9 @@ async function main() {
         fun: XcmV3MultiassetFungibility.Fungible(500_000_000n),
     };
 
+    const expectedMessageId = "0xd60225f721599cb7c6e23cdf4fab26f205e30cd7eb6b5ccf6637cdc80b2339b2";
+    const setTopic = XcmV5Instruction.SetTopic(Binary.fromHex(expectedMessageId));
+
     const message = XcmVersionedXcm.V5([
         // 1. Withdraw DOT from Asset Hub
         XcmV5Instruction.WithdrawAsset([dotAsset]),
@@ -106,8 +109,6 @@ async function main() {
             dest: hydradxDest,
             xcm: [
                 // 2a. Pay for execution on HydraDX
-                XcmV5Instruction.ReceiveTeleportedAsset([dotAsset]),
-                XcmV5Instruction.ReserveAssetDeposited([dotAsset]),
                 XcmV5Instruction.BuyExecution({
                     fees: dotFeeAsset,
                     weight_limit: XcmV3WeightLimit.Unlimited(),
@@ -142,8 +143,14 @@ async function main() {
                         }),
                     ],
                 }),
+
+                // 2d. Set topic
+                setTopic
             ],
         }),
+
+        // 3. Set the same topic
+        setTopic,
     ]);
 
     const weight: any = await assetHubApi.apis.XcmPaymentApi.query_xcm_weight(message);
@@ -198,6 +205,11 @@ async function main() {
         if (sentEvents.length > 0) {
             const sentMessageId = sentEvents[0].payload.message_id.asHex();
             console.log(`📣 Last message Sent on Polkadot Asset Hub: ${sentMessageId}`);
+            if (sentMessageId === expectedMessageId) {
+                console.log("✅ Sent message ID matched.");
+            } else {
+                console.error("❌ Sent message ID does not match expexted message ID.");
+            }
 
             let processedMessageId = undefined
             const maxRetries = 8;
@@ -227,10 +239,10 @@ async function main() {
                 }
             }
 
-            if (processedMessageId === sentMessageId) {
-                console.log("✅ Message ID matched.");
+            if (processedMessageId === expectedMessageId) {
+                console.log("✅ Processed Message ID matched.");
             } else {
-                console.error("❌ Processed message ID does not match sent message ID.");
+                console.error("❌ Processed message ID does not match expected message ID.");
             }
         } else {
             console.log("📣 No Sent events on Polkadot Asset Hub found.");
