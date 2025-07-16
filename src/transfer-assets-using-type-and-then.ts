@@ -71,12 +71,10 @@ async function main() {
                 XcmV5Junction.Parachain(2034)
             )
         }),
-        assets: DotXcmVersionedAssets.V4([
-            {
-                id: assetId,
-                fun: XcmV3MultiassetFungibility.Fungible(3_823_214_300_643n),
-            }
-        ]),
+        assets: DotXcmVersionedAssets.V4([{
+            id: assetId,
+            fun: XcmV3MultiassetFungibility.Fungible(3_823_214_300_643n),
+        }]),
         assets_transfer_type: reserve,
         remote_fees_id: DotXcmVersionedAssetId.V4(assetId),
         fees_transfer_type: reserve,

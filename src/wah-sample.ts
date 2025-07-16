@@ -3,13 +3,15 @@ import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat";
 import { getWsProvider } from "polkadot-api/ws-provider/web";
 import {
     assetHubWestend,
-    AssetHubWestendCalls,
     XcmV3MultiassetFungibility,
     XcmV3WeightLimit,
+    XcmV5AssetFilter,
     XcmV5Instruction,
     XcmV5Junction,
     XcmV5Junctions,
-    XcmV5NetworkId
+    XcmV5NetworkId,
+    XcmV5WildAsset,
+    XcmVersionedXcm,
 } from "@polkadot-api/descriptors";
 import { sr25519CreateDerive } from "@polkadot-labs/hdkd";
 import { DEV_PHRASE, entropyToMiniSecret, mnemonicToEntropy, ss58Address } from "@polkadot-labs/hdkd-helpers";
@@ -48,8 +50,7 @@ async function main() {
     };
     const network = XcmV5NetworkId.ByGenesis(Binary.fromHex("0xe143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e"));
     const setTopic = XcmV5Instruction.SetTopic(Binary.fromHex("0x5c082b4750ee8c34986eb22ce6e345bad2360f3682cda3e99de94b0d9970cb3e"))
-
-    const message: AssetHubWestendCalls['PolkadotXcm']['execute']['message'] = Enum("V5", [
+    const message = XcmVersionedXcm.V5([
         XcmV5Instruction.WithdrawAsset([asset]),
         XcmV5Instruction.BuyExecution({
             fees: asset,
@@ -57,10 +58,7 @@ async function main() {
         }),
         XcmV5Instruction.SetAppendix([
             XcmV5Instruction.DepositAsset({
-                assets: {
-                    type: "Wild",
-                    value: { type: "AllCounted", value: 1 }
-                },
+                assets: XcmV5AssetFilter.Wild(XcmV5WildAsset.All()),
                 beneficiary: {
                     interior: XcmV5Junctions.X1(
                         XcmV5Junction.Parachain(1000)
@@ -98,10 +96,7 @@ async function main() {
                     weight_limit: XcmV3WeightLimit.Unlimited(),
                 }),
                 XcmV5Instruction.DepositAsset({
-                    assets: {
-                        type: "Wild",
-                        value: { type: "AllCounted", value: 1 }
-                    },
+                    assets: XcmV5AssetFilter.Wild(XcmV5WildAsset.All()),
                     beneficiary: {
                         interior: XcmV5Junctions.X1(
                             XcmV5Junction.AccountKey20({ key: Binary.fromHex("0x302f0b71b8ad3cf6dd90adb668e49b2168d652fd") })

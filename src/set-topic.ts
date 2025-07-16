@@ -2,7 +2,13 @@ import { Binary, createClient, Enum } from "polkadot-api";
 import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat";
 import { getPolkadotSigner } from "polkadot-api/signer";
 import { getWsProvider } from "polkadot-api/ws-provider/web";
-import { assetHub, AssetHubCalls, XcmV5Instruction, XcmV5Junction, XcmV5Junctions } from "@polkadot-api/descriptors";
+import {
+    assetHub,
+    XcmV5Instruction,
+    XcmV5Junction,
+    XcmV5Junctions,
+    XcmVersionedXcm,
+} from "@polkadot-api/descriptors";
 import { DEV_PHRASE, entropyToMiniSecret, mnemonicToEntropy } from "@polkadot-labs/hdkd-helpers";
 import { sr25519CreateDerive } from "@polkadot-labs/hdkd";
 
@@ -29,7 +35,7 @@ async function main() {
     const alice = derive("//Alice");
     const aliceSigner = getPolkadotSigner(alice.publicKey, "Sr25519", alice.sign);
 
-    const message: AssetHubCalls['PolkadotXcm']['execute']['message'] = Enum("V5", [
+    const message = XcmVersionedXcm.V5([
         XcmV5Instruction.DescendOrigin(
             XcmV5Junctions.X1(XcmV5Junction.AccountId32({ id: Binary.fromBytes(alice.publicKey) }))
         ),
