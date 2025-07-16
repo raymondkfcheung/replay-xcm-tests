@@ -97,7 +97,6 @@ async function main() {
     };
 
     const expectedMessageId = "0xd60225f721599cb7c6e23cdf4fab26f205e30cd7eb6b5ccf6637cdc80b2339b2";
-    const setTopic = XcmV5Instruction.SetTopic(Binary.fromHex(expectedMessageId));
 
     const message = XcmVersionedXcm.V5([
         // 1. Withdraw DOT from Asset Hub
@@ -143,14 +142,11 @@ async function main() {
                         }),
                     ],
                 }),
-
-                // 2d. Set topic
-                setTopic
             ],
         }),
 
-        // 3. Set the same topic
-        setTopic,
+        // 3. Set topic ID for the message (optional)
+        XcmV5Instruction.SetTopic(Binary.fromHex(expectedMessageId)),
     ]);
 
     const weight: any = await assetHubApi.apis.XcmPaymentApi.query_xcm_weight(message);

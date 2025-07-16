@@ -14,6 +14,7 @@ Assuming you're familiar with how to replay a forked chain using [Chopsticks](ht
 
 * [`hydration-sample1.ts`](../src/hydration-sample1.ts)
 * [`limited-reserve-transfer-assets.ts`](../src/limited-reserve-transfer-assets.ts)
+* [multiple-hops.ts](../src/multiple-hops.ts)
 
 ```bash
 npx ts-node src/limited-reserve-transfer-assets.ts
@@ -132,6 +133,45 @@ Example:
   * If `SetTopic` is already present, it will **not be overridden**.
   * Best practice: **Place `SetTopic` at the end** of your instruction list to align with runtime expectations.
 * On **newer runtimes**, the same topic is **preserved end-to-end** across all chains involved in a multi-hop transfer. This ensures consistent `message_id` correlation between `Sent` and `Processed` events.
+
+### 🏷️ `SetTopic` Manually
+
+When you manually include a custom `SetTopic`, the same topic ID will be **preserved end-to-end** across all chains involved in the transfer.
+
+This is useful for **correlating multi-hop messages** using a known `message_id`.
+
+💡 Full example available at [`multiple-hops.ts`](../src/multiple-hops.ts).
+
+```ts
+const message = XcmVersionedXcm.V5([
+  // Local instructions...
+
+  // Remote hop
+  XcmV5Instruction.DepositReserveAsset({
+    assets: allAssets,
+    dest: hydradxDest,
+    xcm: [
+      // remote instructions...
+    ]
+  }),
+
+  // Optional: explicitly set the topic for tracking
+  XcmV5Instruction.SetTopic(
+    Binary.fromHex("0xd60225f721599cb7c6e23cdf4fab26f205e30cd7eb6b5ccf6637cdc80b2339b2")
+  ),
+]);
+```
+
+📦 Example log output:
+
+```console
+📦 Finalised on Polkadot Asset Hub in block #9274979: 0xc4f64330979f...
+📣 Last message Sent on Polkadot Asset Hub: 0xd60225f721599cb7...
+✅ Sent message ID matched.
+📦 Finalised on Hydration in block #8336540: 0x04493487a216...
+📣 Last message Processed on Hydration: 0xd60225f721599cb7...
+✅ Processed message ID matched.
+```
 
 ### 🧩 Workaround for Older Runtimes
 
