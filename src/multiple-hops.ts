@@ -87,11 +87,11 @@ async function main() {
 
     const usdtAsset = {
         id: {
-            parents: 0,
             interior: XcmV5Junctions.X2([
                 XcmV5Junction.PalletInstance(50),
                 XcmV5Junction.GeneralIndex(1984n),
             ]),
+            parents: 0,
         },
         fun: XcmV3MultiassetFungibility.Fungible(500_000_000n),
     };
@@ -106,6 +106,8 @@ async function main() {
             dest: hydradxDest,
             xcm: [
                 // 2a. Pay for execution on HydraDX
+                XcmV5Instruction.ReceiveTeleportedAsset([dotAsset]),
+                XcmV5Instruction.ReserveAssetDeposited([dotAsset]),
                 XcmV5Instruction.BuyExecution({
                     fees: dotFeeAsset,
                     weight_limit: XcmV3WeightLimit.Unlimited(),
@@ -177,7 +179,7 @@ async function main() {
     } else {
         console.log("✅ Local dry run successful.");
 
-        const parachainBlockBefore = await parachainClient.getFinalizedBlock()
+        let parachainBlockBefore = await parachainClient.getFinalizedBlock()
 
         const ev = await tx.signAndSubmit(aliceSigner);
         console.log(`📦 Finalised on Polkadot Asset Hub in block #${ev.block.number}: ${ev.block.hash}`);
@@ -210,14 +212,19 @@ async function main() {
 
                 console.log(`📦 Finalised on ${parachainName} in block #${parachainBlockAfter.number}: ${parachainBlockAfter.hash}`);
                 const processedEvents = await parachainApi.event.MessageQueue.Processed.pull();
+                const processingFailedEvents = await parachainApi.event.MessageQueue.ProcessingFailed.pull();
                 if (processedEvents.length > 0) {
                     processedMessageId = processedEvents[0].payload.id.asHex();
                     console.log(`📣 Last message Processed on ${parachainName}: ${processedMessageId}`);
+                    break;
+                } else if (processingFailedEvents.length > 0) {
+                    processedMessageId = processingFailedEvents[0].payload.id.asHex();
+                    console.log(`📣 Last message ProcessingFailed on ${parachainName}: ${processedMessageId}`);
+                    break;
                 } else {
                     console.log(`📣 No Processed events on ${parachainName} found.`);
+                    parachainBlockBefore = parachainBlockAfter; // Update the block before to the latest one
                 }
-
-                break;
             }
 
             if (processedMessageId === sentMessageId) {
