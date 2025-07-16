@@ -59,17 +59,18 @@ async function main() {
     const aliceAddress = ss58Address(alicePublicKey);
 
     const origin = Enum("system", Enum("Signed", aliceAddress));
+
     const reserve = Enum("LocalReserve");
     const assetId = {
-        parents: 1,
         interior: XcmV5Junctions.Here(),
+        parents: 1,
     };
     const tx: Transaction<any, string, string, any> = assetHubApi.tx.PolkadotXcm.transfer_assets_using_type_and_then({
         dest: DotXcmVersionedLocation.V4({
-            parents: 1,
             interior: XcmV5Junctions.X1(
                 XcmV5Junction.Parachain(2034)
-            )
+            ),
+            parents: 1,
         }),
         assets: DotXcmVersionedAssets.V4([{
             id: assetId,
@@ -82,10 +83,10 @@ async function main() {
             XcmV5Instruction.DepositAsset({
                 assets: XcmV5AssetFilter.Wild(XcmV5WildAsset.All()),
                 beneficiary: {
-                    parents: 0,
                     interior: XcmV5Junctions.X1(
                         XcmV5Junction.AccountId32({ id: Binary.fromHex("0xa2c0ccb3b953bb79a4109ce8f56d1538bc5ac2d8f428f4531df973bb7e3c7c13") })
-                    )
+                    ),
+                    parents: 0,
                 }
             })
         ]),
@@ -113,7 +114,7 @@ async function main() {
     } else {
         console.log("✅ Local dry run successful.");
 
-        const parachainBlockBefore = await parachainClient.getFinalizedBlock()
+        let parachainBlockBefore = await parachainClient.getFinalizedBlock()
 
         const ev = await tx.signAndSubmit(aliceSigner);
         console.log(`📦 Finalised on Polkadot Asset Hub in block #${ev.block.number}: ${ev.block.hash}`);
@@ -149,11 +150,11 @@ async function main() {
                 if (processedEvents.length > 0) {
                     processedMessageId = processedEvents[0].payload.id.asHex();
                     console.log(`📣 Last message Processed on ${parachainName}: ${processedMessageId}`);
+                    break;
                 } else {
-                    console.log("📣 No Processed events on ${parachainName} found.");
+                    console.log(`📣 No Processed events on ${parachainName} found.`);
+                    parachainBlockBefore = parachainBlockAfter; // Update the block before to the latest one
                 }
-
-                break;
             }
 
             if (processedMessageId === sentMessageId) {

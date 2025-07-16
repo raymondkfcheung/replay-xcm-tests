@@ -142,7 +142,7 @@ async function main() {
                     processedMessageId = processedEvents[0].payload.id.asHex();
                     console.log(`📣 Last message Processed on ${parachainName}: ${processedMessageId}`);
                 } else {
-                    console.log("📣 No Processed events on ${parachainName} found.");
+                    console.log(`📣 No Processed events on ${parachainName} found.`);
                 }
 
                 break;
