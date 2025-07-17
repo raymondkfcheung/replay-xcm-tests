@@ -5,14 +5,14 @@ import { getWsProvider } from "polkadot-api/ws-provider/web";
 import {
     assetHub,
     hydration,
-    XcmV3Junction,
-    XcmV3Junctions,
+    XcmV5Junction,
+    XcmV5Junctions,
+    XcmV5AssetFilter,
+    XcmV5Instruction,
+    XcmV5WildAsset,
+    XcmVersionedXcm,
     XcmV3MultiassetFungibility,
     XcmV3WeightLimit,
-    XcmV4AssetAssetFilter,
-    XcmV4AssetWildAsset,
-    XcmV4Instruction,
-    XcmVersionedXcm,
 } from "@polkadot-api/descriptors";
 import { sr25519CreateDerive } from "@polkadot-labs/hdkd";
 import { DEV_PHRASE, entropyToMiniSecret, mnemonicToEntropy, ss58Address } from "@polkadot-labs/hdkd-helpers";
@@ -55,49 +55,49 @@ async function main() {
 
     const origin = Enum("system", Enum("Signed", aliceAddress));
     const expectedMessageId = "0x836c6039763718fd3db4e22484fc4bacd7ddf1c74b6067d15b297ea72d8ecf89";
-    const message = XcmVersionedXcm.V4([
-        XcmV4Instruction.WithdrawAsset([{
+    const message = XcmVersionedXcm.V5([
+        XcmV5Instruction.WithdrawAsset([{
             id: {
-                interior: XcmV3Junctions.Here(),
+                interior: XcmV5Junctions.Here(),
                 parents: 1,
             },
             fun: XcmV3MultiassetFungibility.Fungible(1_000_000_000n),
         }]),
-        XcmV4Instruction.ClearOrigin(),
-        XcmV4Instruction.BuyExecution({
+        XcmV5Instruction.ClearOrigin(),
+        XcmV5Instruction.BuyExecution({
             fees: {
                 id: {
-                    interior: XcmV3Junctions.Here(),
+                    interior: XcmV5Junctions.Here(),
                     parents: 1,
                 },
                 fun: XcmV3MultiassetFungibility.Fungible(500_000_000n),
             },
             weight_limit: XcmV3WeightLimit.Unlimited(),
         }),
-        XcmV4Instruction.DepositReserveAsset({
-            assets: XcmV4AssetAssetFilter.Wild(XcmV4AssetWildAsset.All()),
+        XcmV5Instruction.DepositReserveAsset({
+            assets: XcmV5AssetFilter.Wild(XcmV5WildAsset.All()),
             dest: {
-                interior: XcmV3Junctions.X1(
-                    XcmV3Junction.Parachain(2034)
+                interior: XcmV5Junctions.X1(
+                    XcmV5Junction.Parachain(2034)
                 ),
                 parents: 1,
             },
             xcm: [
-                XcmV4Instruction.BuyExecution({
+                XcmV5Instruction.BuyExecution({
                     fees: {
                         id: {
-                            interior: XcmV3Junctions.Here(),
+                            interior: XcmV5Junctions.Here(),
                             parents: 1,
                         },
                         fun: XcmV3MultiassetFungibility.Fungible(500_000_000n),
                     },
                     weight_limit: XcmV3WeightLimit.Unlimited(),
                 }),
-                XcmV4Instruction.DepositAsset({
-                    assets: XcmV4AssetAssetFilter.Wild(XcmV4AssetWildAsset.All()),
+                XcmV5Instruction.DepositAsset({
+                    assets: XcmV5AssetFilter.Wild(XcmV5WildAsset.All()),
                     beneficiary: {
-                        interior: XcmV3Junctions.X1(
-                            XcmV3Junction.AccountKey20({
+                        interior: XcmV5Junctions.X1(
+                            XcmV5Junction.AccountKey20({
                                 key: Binary.fromHex("0x6971655f19dbe2da9112e50ffdde3dfdcbdf5562"),
                             }),
                         ),
@@ -106,7 +106,7 @@ async function main() {
                 }),
             ],
         }),
-        XcmV4Instruction.SetTopic(Binary.fromHex(expectedMessageId)),
+        XcmV5Instruction.SetTopic(Binary.fromHex(expectedMessageId)),
     ]);
 
     const weight: any = await para1Api.apis.XcmPaymentApi.query_xcm_weight(message);
