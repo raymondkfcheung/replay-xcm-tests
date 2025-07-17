@@ -15,6 +15,7 @@ Assuming you're familiar with how to replay a forked chain using [Chopsticks](ht
 * [`hydration-sample1.ts`](../src/hydration-sample1.ts)
 * [`limited-reserve-transfer-assets.ts`](../src/limited-reserve-transfer-assets.ts)
 * [`multiple-hops-sample-01.ts`](../src/multiple-hops-sample-01.ts)
+* [`multiple-hops-sample-02.ts`](../src/multiple-hops-sample-02.ts)
 
 ```bash
 npx ts-node src/limited-reserve-transfer-assets.ts
@@ -146,7 +147,7 @@ When you manually include a custom `SetTopic`, the same topic ID will be **prese
 
 This is useful for **correlating multi-hop messages** using a known `message_id`.
 
-💡 Full example available at [`multiple-hops-sample-01.ts`](../src/multiple-hops-sample-01.ts).
+💡 Full example available at [`multiple-hops-sample-02.ts`](../src/multiple-hops-sample-02.ts).
 
 ```ts
 const message = XcmVersionedXcm.V5([
@@ -154,8 +155,8 @@ const message = XcmVersionedXcm.V5([
 
   // Remote hop
   XcmV5Instruction.DepositReserveAsset({
-    assets: allAssets,
-    dest: hydradxDest,
+    assets: XcmV5AssetFilter.Wild(XcmV5WildAsset.All()),
+    dest: { interior: XcmV5Junctions.X1(XcmV5Junction.Parachain(2034)), parents: 1, },
     xcm: [
       // remote instructions...
     ]
@@ -163,7 +164,7 @@ const message = XcmVersionedXcm.V5([
 
   // Optional: explicitly set the topic for tracking
   XcmV5Instruction.SetTopic(
-    Binary.fromHex("0xd60225f721599cb7c6e23cdf4fab26f205e30cd7eb6b5ccf6637cdc80b2339b2")
+    Binary.fromHex("0x836c6039763718fd3db4e22484fc4bacd7ddf1c74b6067d15b297ea72d8ecf89")
   ),
 ]);
 ```
@@ -171,12 +172,12 @@ const message = XcmVersionedXcm.V5([
 📦 Example log output:
 
 ```console
-📦 Finalised on Polkadot Asset Hub in block #9274979: 0xc4f64330979f...
-📣 Last message Sent on Polkadot Asset Hub: 0xd60225f721599cb7...
+📦 Finalised on Polkadot Asset Hub in block #9294993: 0xa4e15ad6eae7fcd837f7a7c02a1925165bd97597fbe1ceb74adc17d3cbcf34bd
+📣 Last message Sent on Polkadot Asset Hub: 0x836c6039763718fd3db4e22484fc4bacd7ddf1c74b6067d15b297ea72d8ecf89
 ✅ Sent message ID matched.
-📦 Finalised on Hydration in block #8336540: 0x04493487a216...
-📣 Last message Processed on Hydration: 0xd60225f721599cb7...
-✅ Processed message ID matched.
+📦 Finalised on Hydration in block #8377216: 0x6bb6e7d69c2d574f8646f3c739d872ab832850a44659ea9401249dbe11a4c447
+📣 Last message Processed on Hydration: 0x836c6039763718fd3db4e22484fc4bacd7ddf1c74b6067d15b297ea72d8ecf89
+✅ Processed Message ID matched.
 ```
 
 ### 🧩 Workaround for Older Runtimes
