@@ -56,7 +56,7 @@ The runtime automatically appends a `SetTopic`:
   },
   {
     "type": "SetTopic",
-    "value": "0x85e46e75d9dbb211da2fb28106028960fdd916fbe9fdda3665ae00403abe2aae"
+    "value": "0xb4b8d2c87622cbad983d8f2c92bfe28e12d587e13d15ea4fdabe8f771bf86bce"
   }
 ]
 ```
