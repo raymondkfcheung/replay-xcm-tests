@@ -14,7 +14,7 @@ Assuming you're familiar with how to replay a forked chain using [Chopsticks](ht
 
 * [`hydration-sample1.ts`](../src/hydration-sample1.ts)
 * [`limited-reserve-transfer-assets.ts`](../src/limited-reserve-transfer-assets.ts)
-* [`multiple-hops.ts`](../src/multiple-hops.ts)
+* [`multiple-hops-sample-01.ts`](../src/multiple-hops-sample-01.ts)
 
 ```bash
 npx ts-node src/limited-reserve-transfer-assets.ts
@@ -146,7 +146,7 @@ When you manually include a custom `SetTopic`, the same topic ID will be **prese
 
 This is useful for **correlating multi-hop messages** using a known `message_id`.
 
-💡 Full example available at [`multiple-hops.ts`](../src/multiple-hops.ts).
+💡 Full example available at [`multiple-hops-sample-01.ts`](../src/multiple-hops-sample-01.ts).
 
 ```ts
 const message = XcmVersionedXcm.V5([
