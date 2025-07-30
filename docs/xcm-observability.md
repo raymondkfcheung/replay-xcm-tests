@@ -67,10 +67,10 @@ Here’s an updated version of your section to reflect the current state of XCM 
 
 ### 🔍 Event Correlation Flow
 
-| Chain                             | Event                    | Field        | Description                                                                |
-| --------------------------------- | ------------------------ | ------------ | -------------------------------------------------------------------------- |
-| Origin (e.g. Asset Hub)           | `PolkadotXcm.Sent`       | `message_id` | Message ID from `SetTopic`. Appended automatically if missing.             |
-| Destination (e.g. Acala, HydraDX) | `MessageQueue.Processed` | `id`         | Matches `message_id` from the origin chain, enabling reliable correlation. |
+| Chain                               | Event                    | Field        | Description                                                                |
+| ----------------------------------- | ------------------------ | ------------ | -------------------------------------------------------------------------- |
+| Origin (e.g. Asset Hub)             | `PolkadotXcm.Sent`       | `message_id` | Message ID from `SetTopic`. Appended automatically if missing.             |
+| Destination (e.g. Acala, Hydration) | `MessageQueue.Processed` | `id`         | Matches `message_id` from the origin chain, enabling reliable correlation. |
 
 ✅ **These two fields now match** on new runtimes (`stable2503-5` or later).
 
@@ -130,7 +130,7 @@ Example:
 3. Check node logs to correlate where and why execution failed.
 4. Analyse inner errors (e.g., weight too low, asset mismatch, missing buy execution).
 
-➡️ For full logging setup, see [this guide](https://github.com/polkadot-developers/polkadot-docs/pull/734).
+➡️ For full logging setup, see [this guide](https://docs.polkadot.com/tutorials/interoperability/replay-and-dry-run-xcms/).
 
 ## 🧠 Notes
 
@@ -141,19 +141,21 @@ Example:
   * Best practice: **Place `SetTopic` at the end** of your instruction list to align with runtime expectations.
 * On **newer runtimes**, the same topic is **preserved end-to-end** across all chains involved in a multi-hop transfer. This ensures consistent `message_id` correlation between `Sent` and `Processed` events.
 
-### 🏷️ `SetTopic` Manually
+### 🏷️ Manually Setting `SetTopic` for Cross-Chain Tracking
 
-When you manually include a custom `SetTopic`, the same topic ID will be **preserved end-to-end** across all chains involved in the transfer.
+In multi-hop XCM flows, you may wish to **manually assign a `SetTopic` ID** to **correlate the same message across all involved chains**, especially when you want to track or trace it later.
 
-This is useful for **correlating multi-hop messages** using a known `message_id`.
+This is optional. If `SetTopic` is not included, a topic ID will be generated automatically based on the message contents. However, this auto-generated ID is **not guaranteed to be unique**. If uniqueness is important (e.g. for deduplication or traceability), it must be enforced by the message creator.
 
-💡 Full example available at [`multiple-hops-sample-02.ts`](../src/multiple-hops-sample-02.ts).
+💡 This pattern is demonstrated in [`multiple-hops-sample-02.ts`](../src/multiple-hops-sample-02.ts), which sends DOT from Asset Hub, swaps it on Hydration, and returns the result, all under a known `message_id`.
+
+✍️ Example: Multi-Hop XCM with Fixed `SetTopic`
 
 ```ts
 const message = XcmVersionedXcm.V5([
   // Local instructions...
 
-  // Remote hop
+  // Remote hop to Hydration
   XcmV5Instruction.DepositReserveAsset({
     assets: XcmV5AssetFilter.Wild(XcmV5WildAsset.All()),
     dest: { interior: XcmV5Junctions.X1(XcmV5Junction.Parachain(2034)), parents: 1, },
@@ -162,7 +164,7 @@ const message = XcmVersionedXcm.V5([
     ]
   }),
 
-  // Optional: explicitly set the topic for tracking
+  // Optional: explicitly set topic ID for tracing
   XcmV5Instruction.SetTopic(
     Binary.fromHex("0x836c6039763718fd3db4e22484fc4bacd7ddf1c74b6067d15b297ea72d8ecf89")
   ),
