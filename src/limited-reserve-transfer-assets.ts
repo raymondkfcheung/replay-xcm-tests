@@ -66,7 +66,7 @@ async function main() {
         interior: XcmV5Junctions.X1(
           XcmV5Junction.AccountId32({
             id: Binary.fromHex(
-              "0x14SRhqito1ZhxKD6yxPnNEonsMWRiB5CCCvfAtUNprPcAa3i",
+              "0x9818ff3c27d256631065ecabf0c50e02551e5c5342b8669486c1e566fcbf847f",
             ),
           }),
         ),
@@ -89,95 +89,97 @@ async function main() {
   const decodedCall = tx.decodedCall as any;
   console.log("👀 Executing XCM:", JSON.stringify(decodedCall, toHuman, 2));
 
-  const dryRunResult: any = await assetHubApi.apis.DryRunApi.dry_run_call(
-    origin,
-    decodedCall,
-    XCM_VERSION,
-  );
-  console.log(
-    "📦 Dry run result:",
-    JSON.stringify(dryRunResult.value, toHuman, 2),
-  );
-
-  const executionResult = dryRunResult.value.execution_result;
-  if (!dryRunResult.success || !executionResult.success) {
-    console.error("❌ Local dry run failed!");
-  } else {
-    console.log("✅ Local dry run successful.");
-
-    const parachainBlockBefore = await parachainClient.getFinalizedBlock();
-    const extrinsic = await tx.signAndSubmit(aliceSigner);
-    const block = extrinsic.block;
+  try {
+    const dryRunResult: any = await assetHubApi.apis.DryRunApi.dry_run_call(
+      origin,
+      decodedCall,
+      XCM_VERSION,
+    );
     console.log(
-      `📦 Finalised on Polkadot Asset Hub in block #${block.number}: ${block.hash}`,
+      "📦 Dry run result:",
+      JSON.stringify(dryRunResult.value, toHuman, 2),
     );
 
-    if (!extrinsic.ok) {
-      const dispatchError = extrinsic.dispatchError;
-      if (dispatchError.type === "Module") {
-        const modErr: any = dispatchError.value;
-        console.error(
-          `❌ Dispatch error in module: ${modErr.type} → ${modErr.value?.type}`,
-        );
-      } else {
-        console.error(
-          "❌ Dispatch error:",
-          JSON.stringify(dispatchError, toHuman, 2),
-        );
-      }
-    }
+    const executionResult = dryRunResult.value.execution_result;
+    if (!dryRunResult.success || !executionResult.success) {
+      console.error("❌ Local dry run failed!");
+    } else {
+      console.log("✅ Local dry run successful.");
 
-    const sentEvents = await assetHubApi.event.PolkadotXcm.Sent.pull();
-    if (sentEvents.length > 0) {
-      const sentMessageId = sentEvents[0].payload.message_id.asHex();
+      const parachainBlockBefore = await parachainClient.getFinalizedBlock();
+      const extrinsic = await tx.signAndSubmit(aliceSigner);
+      const block = extrinsic.block;
       console.log(
-        `📣 Last message Sent on Polkadot Asset Hub: ${sentMessageId}`,
+        `📦 Finalised on Polkadot Asset Hub in block #${block.number}: ${block.hash}`,
       );
 
-      let processedMessageId = undefined;
-      const maxRetries = 8;
-      for (let i = 0; i < maxRetries; i++) {
-        const parachainBlockAfter = await parachainClient.getFinalizedBlock();
-        if (parachainBlockAfter.number == parachainBlockBefore.number) {
-          const waiting = 1_000 * (i + 1);
-          console.log(
-            `⏳ Waiting ${waiting}ms for ${parachainName} block to be finalised (${i + 1}/${maxRetries})...`,
-          );
-          await new Promise((resolve) => setTimeout(resolve, waiting));
-          continue;
-        }
-
-        console.log(
-          `📦 Finalised on ${parachainName} in block #${parachainBlockAfter.number}: ${parachainBlockAfter.hash}`,
-        );
-        const processedEvents =
-          await parachainApi.event.MessageQueue.Processed.pull();
-        if (processedEvents.length > 0) {
-          processedMessageId = processedEvents[0].payload.id.asHex();
-          console.log(
-            `📣 Last message Processed on ${parachainName}: ${processedMessageId}`,
+      if (!extrinsic.ok) {
+        const dispatchError = extrinsic.dispatchError;
+        if (dispatchError.type === "Module") {
+          const modErr: any = dispatchError.value;
+          console.error(
+            `❌ Dispatch error in module: ${modErr.type} → ${modErr.value?.type}`,
           );
         } else {
-          console.log(`📣 No Processed events on ${parachainName} found.`);
+          console.error(
+            "❌ Dispatch error:",
+            JSON.stringify(dispatchError, toHuman, 2),
+          );
+        }
+      }
+
+      const sentEvents = await assetHubApi.event.PolkadotXcm.Sent.pull();
+      if (sentEvents.length > 0) {
+        const sentMessageId = sentEvents[0].payload.message_id.asHex();
+        console.log(
+          `📣 Last message Sent on Polkadot Asset Hub: ${sentMessageId}`,
+        );
+
+        let processedMessageId = undefined;
+        const maxRetries = 8;
+        for (let i = 0; i < maxRetries; i++) {
+          const parachainBlockAfter = await parachainClient.getFinalizedBlock();
+          if (parachainBlockAfter.number == parachainBlockBefore.number) {
+            const waiting = 1_000 * (i + 1);
+            console.log(
+              `⏳ Waiting ${waiting}ms for ${parachainName} block to be finalised (${i + 1}/${maxRetries})...`,
+            );
+            await new Promise((resolve) => setTimeout(resolve, waiting));
+            continue;
+          }
+
+          console.log(
+            `📦 Finalised on ${parachainName} in block #${parachainBlockAfter.number}: ${parachainBlockAfter.hash}`,
+          );
+          const processedEvents =
+            await parachainApi.event.MessageQueue.Processed.pull();
+          if (processedEvents.length > 0) {
+            processedMessageId = processedEvents[0].payload.id.asHex();
+            console.log(
+              `📣 Last message Processed on ${parachainName}: ${processedMessageId}`,
+            );
+          } else {
+            console.log(`📣 No Processed events on ${parachainName} found.`);
+          }
+
+          break;
         }
 
-        break;
-      }
-
-      if (processedMessageId === sentMessageId) {
-        console.log("✅ Message ID matched.");
+        if (processedMessageId === sentMessageId) {
+          console.log("✅ Message ID matched.");
+        } else {
+          console.error(
+            "❌ Processed message ID does not match sent message ID.",
+          );
+        }
       } else {
-        console.error(
-          "❌ Processed message ID does not match sent message ID.",
-        );
+        console.log("📣 No Sent events on Polkadot Asset Hub found.");
       }
-    } else {
-      console.log("📣 No Sent events on Polkadot Asset Hub found.");
     }
+  } finally {
+    assetHubClient.destroy();
+    parachainClient.destroy();
   }
-
-  assetHubClient.destroy();
-  parachainClient.destroy();
 }
 
 main().catch(console.error);

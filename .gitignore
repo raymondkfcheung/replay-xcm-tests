@@ -138,7 +138,7 @@ dist
 # Other files
 .idea/
 .papi/
-db.sqlite*
+*db.sqlite*
 package-lock.json
 wasms/*.wasm
 *-local.*
