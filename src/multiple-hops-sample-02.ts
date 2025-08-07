@@ -182,16 +182,12 @@ async function main() {
                     const parachainBlockAfter = await para2Client.getFinalizedBlock();
                     if (parachainBlockAfter.number == parachainBlockBefore.number) {
                         const waiting = 1_000 * (i + 1);
-                        console.log(
-                            `⏳ Waiting ${waiting}ms for ${para2Name} block to be finalised (${i + 1}/${maxRetries})...`,
-                        );
+                        console.log(`⏳ Waiting ${waiting}ms for ${para2Name} block to be finalised (${i + 1}/${maxRetries})...`);
                         await new Promise((resolve) => setTimeout(resolve, waiting));
                         continue;
                     }
 
-                    console.log(
-                        `📦 Finalised on ${para2Name} in block #${parachainBlockAfter.number}: ${parachainBlockAfter.hash}`,
-                    );
+                    console.log(`📦 Finalised on ${para2Name} in block #${parachainBlockAfter.number}: ${parachainBlockAfter.hash}`);
                     const processedEvents = await para2Api.event.MessageQueue.Processed.pull();
                     const processingFailedEvents = await para2Api.event.MessageQueue.ProcessingFailed.pull();
                     if (processedEvents.length > 0) {
@@ -215,6 +211,13 @@ async function main() {
                 }
             } else {
                 console.log(`📣 No Sent events on ${para1Name} found.`);
+
+                const msgSentEvents = await para1Api.event.XcmpQueue.XcmpMessageSent.pull();
+                if (msgSentEvents.length > 0) {
+                    const messageHash = msgSentEvents[0].payload.message_hash.asHex();
+                    console.log(`📣 Last message XcmpMessageSent on ${para1Name}: ${messageHash}`);
+                    console.log(`⚠️ PolkadotXcm.Sent is available in runtimes built from stable2503-5 or later.`);
+                }
             }
         }
     } finally {
