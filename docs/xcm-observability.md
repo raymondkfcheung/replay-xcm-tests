@@ -63,12 +63,10 @@ The runtime automatically appends a `SetTopic`:
 
 This forwarded message lands on the destination chain (Acala) and is processed accordingly.
 
-Here’s an updated version of your section to reflect the current state of XCM message tracking across chains more clearly and accurately:
-
 ### 🔍 Event Correlation Flow
 
 | Chain                               | Event                    | Field        | Description                                                                |
-| ----------------------------------- | ------------------------ | ------------ | -------------------------------------------------------------------------- |
+|-------------------------------------|--------------------------|--------------|----------------------------------------------------------------------------|
 | Origin (e.g. Asset Hub)             | `PolkadotXcm.Sent`       | `message_id` | Message ID from `SetTopic`. Appended automatically if missing.             |
 | Destination (e.g. Acala, Hydration) | `MessageQueue.Processed` | `id`         | Matches `message_id` from the origin chain, enabling reliable correlation. |
 
