@@ -25,9 +25,6 @@ import {
 const XCM_VERSION = 5;
 const UNIT = 1_000_000_000_000n;
 
-// 1000000000000
-//  999693050000
-
 const toHuman = (_key: any, value: any) => {
     if (typeof value === "bigint") {
         return Number(value);
@@ -62,15 +59,21 @@ async function main() {
     const aliceAddress = ss58Address(alicePublicKey);
 
     const origin = Enum("system", Enum("Signed", aliceAddress));
+    const beneficiary = {
+        parents: 0,
+        interior: XcmV5Junctions.X1(XcmV5Junction.AccountId32({
+            id: Binary.fromHex("0x9818ff3c27d256631065ecabf0c50e02551e5c5342b8669486c1e566fcbf847f")
+        })),
+    }
 
     const allAssets = XcmV5AssetFilter.Wild(XcmV5WildAsset.All());
     const para1Dest = {
-        interior: XcmV5Junctions.Here(),
         parents: 1,
+        interior: XcmV5Junctions.Here(),
     };
     const dotAssetId = {
-        interior: XcmV5Junctions.Here(),
         parents: 1,
+        interior: XcmV5Junctions.Here(),
     };
     const dotAsset = {
         id: dotAssetId,
@@ -83,16 +86,16 @@ async function main() {
     };
 
     const para2Dest = {
-        interior: XcmV5Junctions.X1(XcmV5Junction.Parachain(2034)),
         parents: 1,
+        interior: XcmV5Junctions.X1(XcmV5Junction.Parachain(2034)),
     };
     const usdtAsset = {
         id: {
+            parents: 0,
             interior: XcmV5Junctions.X2([
                 XcmV5Junction.PalletInstance(50),
                 XcmV5Junction.GeneralIndex(1984n),
             ]),
-            parents: 0,
         },
         fun: XcmV3MultiassetFungibility.Fungible(UNIT),
     };
@@ -132,16 +135,7 @@ async function main() {
                         }),
                         XcmV5Instruction.DepositAsset({
                             assets: allAssets,
-                            beneficiary: {
-                                interior: XcmV5Junctions.X1(
-                                    XcmV5Junction.AccountId32({
-                                        id: Binary.fromHex(
-                                            "0x9818ff3c27d256631065ecabf0c50e02551e5c5342b8669486c1e566fcbf847f",
-                                        ),
-                                    }),
-                                ),
-                                parents: 0,
-                            },
+                            beneficiary,
                         }),
                     ],
                 }),

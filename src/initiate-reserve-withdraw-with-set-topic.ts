@@ -5,6 +5,7 @@ import { getWsProvider } from "polkadot-api/ws-provider/web";
 import {
     assetHub,
     hydration,
+    XcmV2MultiassetWildFungibility,
     XcmV3MultiassetFungibility,
     XcmV3WeightLimit,
     XcmV5AssetFilter,
@@ -67,13 +68,17 @@ async function main() {
     const expectedMessageId = "0xd60225f721599cb7c6e23cdf4fab26f205e30cd7eb6b5ccf6637cdc80b2339b2";
 
     const message = XcmVersionedXcm.V5([
-        XcmV5Instruction.WithdrawAsset([
+        XcmV5Instruction.ReserveAssetDeposited([
             {
                 id: {
                     parents: 1,
-                    interior: XcmV5Junctions.Here(),
+                    interior: XcmV5Junctions.X3([
+                        XcmV5Junction.Parachain(1000),
+                        XcmV5Junction.PalletInstance(50),
+                        XcmV5Junction.GeneralIndex(1984n),
+                    ]),
                 },
-                fun: XcmV3MultiassetFungibility.Fungible(1_000_000_000n),
+                fun: XcmV3MultiassetFungibility.Fungible(1_500_000n),
             },
         ]),
         XcmV5Instruction.ClearOrigin(),
@@ -81,17 +86,56 @@ async function main() {
             fees: {
                 id: {
                     parents: 1,
-                    interior: XcmV5Junctions.Here(),
+                    interior: XcmV5Junctions.X3([
+                        XcmV5Junction.Parachain(1000),
+                        XcmV5Junction.PalletInstance(50),
+                        XcmV5Junction.GeneralIndex(1984n),
+                    ]),
                 },
-                fun: XcmV3MultiassetFungibility.Fungible(500_000_000n),
+                fun: XcmV3MultiassetFungibility.Fungible(1_500_000n),
             },
             weight_limit: XcmV3WeightLimit.Unlimited(),
         }),
-        XcmV5Instruction.DepositReserveAsset({
-            assets: XcmV5AssetFilter.Wild(XcmV5WildAsset.All()),
-            dest: {
+        XcmV5Instruction.ExchangeAsset({
+            give: XcmV5AssetFilter.Wild(
+                XcmV5WildAsset.AllOf({
+                    id: {
+                        parents: 1,
+                        interior: XcmV5Junctions.X3([
+                            XcmV5Junction.Parachain(1000),
+                            XcmV5Junction.PalletInstance(50),
+                            XcmV5Junction.GeneralIndex(1984n),
+                        ]),
+                    },
+                    fun: XcmV2MultiassetWildFungibility.Fungible(),
+                }),
+            ),
+            want: [
+                {
+                    id: {
+                        parents: 1,
+                        interior: XcmV5Junctions.Here(),
+                    },
+                    fun: XcmV3MultiassetFungibility.Fungible(3_552_961_212n),
+                },
+            ],
+            maximal: false,
+        }),
+        XcmV5Instruction.InitiateReserveWithdraw({
+            assets: XcmV5AssetFilter.Wild(
+                XcmV5WildAsset.AllOf({
+                    id: {
+                        parents: 1,
+                        interior: XcmV5Junctions.Here(),
+                    },
+                    fun: XcmV2MultiassetWildFungibility.Fungible(),
+                }),
+            ),
+            reserve: {
                 parents: 1,
-                interior: XcmV5Junctions.X1(XcmV5Junction.Parachain(2034)),
+                interior: XcmV5Junctions.X1(
+                    XcmV5Junction.Parachain(1000),
+                ),
             },
             xcm: [
                 XcmV5Instruction.BuyExecution({
@@ -100,12 +144,20 @@ async function main() {
                             parents: 1,
                             interior: XcmV5Junctions.Here(),
                         },
-                        fun: XcmV3MultiassetFungibility.Fungible(500_000_000n),
+                        fun: XcmV3MultiassetFungibility.Fungible(3_552_961_210n),
                     },
                     weight_limit: XcmV3WeightLimit.Unlimited(),
                 }),
                 XcmV5Instruction.DepositAsset({
-                    assets: XcmV5AssetFilter.Wild(XcmV5WildAsset.All()),
+                    assets: XcmV5AssetFilter.Wild(
+                        XcmV5WildAsset.AllOf({
+                            id: {
+                                parents: 1,
+                                interior: XcmV5Junctions.Here(),
+                            },
+                            fun: XcmV2MultiassetWildFungibility.Fungible(),
+                        }),
+                    ),
                     beneficiary,
                 }),
             ],
