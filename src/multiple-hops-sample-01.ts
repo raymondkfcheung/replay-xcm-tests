@@ -25,6 +25,9 @@ import {
 const XCM_VERSION = 5;
 const UNIT = 1_000_000_000_000n;
 
+// 1000000000000
+//  999693050000
+
 const toHuman = (_key: any, value: any) => {
     if (typeof value === "bigint") {
         return Number(value);
@@ -71,7 +74,7 @@ async function main() {
     };
     const dotAsset = {
         id: dotAssetId,
-        fun: XcmV3MultiassetFungibility.Fungible(UNIT),
+        fun: XcmV3MultiassetFungibility.Fungible(UNIT * 2n),
     };
     const dotAssetSwapFilter = XcmV5AssetFilter.Definite([dotAsset]);
     const dotFeeAsset = {
@@ -91,7 +94,7 @@ async function main() {
             ]),
             parents: 0,
         },
-        fun: XcmV3MultiassetFungibility.Fungible(500_000_000n),
+        fun: XcmV3MultiassetFungibility.Fungible(UNIT),
     };
 
     const expectedMessageId = "0xd60225f721599cb7c6e23cdf4fab26f205e30cd7eb6b5ccf6637cdc80b2339b2";

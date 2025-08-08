@@ -15,7 +15,7 @@ Assuming you're familiar with how to replay a forked chain using [Chopsticks](ht
 * [`hydration-sample1.ts`](../src/hydration-sample1.ts)
 * [`limited-reserve-transfer-assets.ts`](../src/limited-reserve-transfer-assets.ts)
 * [`multiple-hops-sample-01.ts`](../src/multiple-hops-sample-01.ts)
-* [`multi-hop-with-set-topic.ts`](../src/multi-hop-with-set-topic.ts)
+* [`deposit-reserve-asset-with-set-topic.ts`](../src/deposit-reserve-asset-with-set-topic.ts)
 
 ```bash
 npx ts-node src/limited-reserve-transfer-assets.ts
@@ -145,7 +145,7 @@ In multi-hop XCM flows, you may wish to **manually assign a `SetTopic` ID** to *
 
 This is optional. If `SetTopic` is not included, a topic ID will be generated automatically based on the message contents. However, this auto-generated ID is **not guaranteed to be unique**. If uniqueness is important (e.g. for deduplication or traceability), it must be enforced by the message creator.
 
-💡 This pattern is demonstrated in [`multi-hop-with-set-topic.ts`](../src/multi-hop-with-set-topic.ts), which sends DOT from Asset Hub, swaps it on Hydration, and returns the result, all under a known `message_id`.
+💡 This pattern is demonstrated in [`deposit-reserve-asset-with-set-topic.ts`](../src/deposit-reserve-asset-with-set-topic.ts), which sends DOT from Asset Hub, swaps it on Hydration, and returns the result, all under a known `message_id`.
 
 ✍️ Example: Multi-Hop XCM with Fixed `SetTopic`
 
