@@ -1,10 +1,11 @@
-import { Binary, createClient, Enum, Transaction } from "polkadot-api";
+import { Binary, createClient, Enum } from "polkadot-api";
 import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat";
 import { getPolkadotSigner } from "polkadot-api/signer";
 import { getWsProvider } from "polkadot-api/ws-provider/web";
 import {
     assetHub,
     hydration,
+    XcmV2MultiassetWildFungibility,
     XcmV3MultiassetFungibility,
     XcmV3WeightLimit,
     XcmV5AssetFilter,
@@ -22,8 +23,10 @@ import {
     ss58Address,
 } from "@polkadot-labs/hdkd-helpers";
 
+// npx papi add assetHubWestend -w ws://localhost:8000
+// npx papi add bridgeHubWestend -w ws://localhost:8001
+
 const XCM_VERSION = 5;
-const UNIT = 1_000_000_000_000n;
 
 const toHuman = (_key: any, value: any) => {
     if (typeof value === "bigint") {
@@ -65,78 +68,118 @@ async function main() {
             id: Binary.fromHex("0x9818ff3c27d256631065ecabf0c50e02551e5c5342b8669486c1e566fcbf847f")
         })),
     }
-
-    const allAssets = XcmV5AssetFilter.Wild(XcmV5WildAsset.All());
-    const para1Dest = {
-        parents: 1,
-        interior: XcmV5Junctions.Here(),
-    };
-    const dotAssetId = {
-        parents: 1,
-        interior: XcmV5Junctions.Here(),
-    };
-    const dotAsset = {
-        id: dotAssetId,
-        fun: XcmV3MultiassetFungibility.Fungible(UNIT * 2n),
-    };
-    const dotAssetSwapFilter = XcmV5AssetFilter.Definite([dotAsset]);
-    const dotFeeAsset = {
-        id: dotAssetId,
-        fun: XcmV3MultiassetFungibility.Fungible(UNIT),
-    };
-
-    const para2Dest = {
-        parents: 1,
-        interior: XcmV5Junctions.X1(XcmV5Junction.Parachain(2034)),
-    };
-    const usdtAsset = {
-        id: {
-            parents: 0,
-            interior: XcmV5Junctions.X2([
-                XcmV5Junction.PalletInstance(50),
-                XcmV5Junction.GeneralIndex(1984n),
-            ]),
-        },
-        fun: XcmV3MultiassetFungibility.Fungible(UNIT),
-    };
-
     const expectedMessageId = "0xd60225f721599cb7c6e23cdf4fab26f205e30cd7eb6b5ccf6637cdc80b2339b2";
 
     const message = XcmVersionedXcm.V5([
-        // 1. Withdraw DOT from Asset Hub
-        XcmV5Instruction.WithdrawAsset([dotAsset]),
+        XcmV5Instruction.WithdrawAsset([{
+            id: {
+                parents: 0,
+                interior: XcmV5Junctions.X2([
+                    XcmV5Junction.PalletInstance(50),
+                    XcmV5Junction.GeneralIndex(1984n),
+                ]),
+            },
+            fun: XcmV3MultiassetFungibility.Fungible(1_000_000n),
+        }]),
 
         XcmV5Instruction.SetFeesMode({ jit_withdraw: true }),
 
-        // 2. Deposit to Hydration with instructions
         XcmV5Instruction.DepositReserveAsset({
-            assets: allAssets,
-            dest: para2Dest,
+            assets: XcmV5AssetFilter.Wild(
+                XcmV5WildAsset.AllOf({
+                    id: {
+                        parents: 0,
+                        interior: XcmV5Junctions.X2([
+                            XcmV5Junction.PalletInstance(50),
+                            XcmV5Junction.GeneralIndex(1984n),
+                        ]),
+                    },
+                    fun: XcmV2MultiassetWildFungibility.Fungible(),
+                })),
+            dest: {
+                parents: 1,
+                interior: XcmV5Junctions.X1(XcmV5Junction.Parachain(2034)),
+            },
             xcm: [
-                // 2a. Pay for execution on Hydration
                 XcmV5Instruction.BuyExecution({
-                    fees: dotFeeAsset,
+                    fees: {
+                        id: {
+                            parents: 1,
+                            interior: XcmV5Junctions.X3([
+                                XcmV5Junction.Parachain(1000),
+                                XcmV5Junction.PalletInstance(50),
+                                XcmV5Junction.GeneralIndex(1984n),
+                            ]),
+                        },
+                        fun: XcmV3MultiassetFungibility.Fungible(1_000_000n),
+                    },
                     weight_limit: XcmV3WeightLimit.Unlimited(),
                 }),
 
-                // 2b. Exchange DOT for USDT
                 XcmV5Instruction.ExchangeAsset({
-                    give: dotAssetSwapFilter,
-                    want: [usdtAsset],
-                    maximal: true,
+                    give: XcmV5AssetFilter.Wild(
+                        XcmV5WildAsset.AllOf({
+                            id: {
+                                parents: 1,
+                                interior: XcmV5Junctions.X3([
+                                    XcmV5Junction.Parachain(1000),
+                                    XcmV5Junction.PalletInstance(50),
+                                    XcmV5Junction.GeneralIndex(1984n),
+                                ]),
+                            },
+                            fun: XcmV2MultiassetWildFungibility.Fungible(),
+                        }),
+                    ),
+                    want: [
+                        {
+                            id: {
+                                parents: 1,
+                                interior: XcmV5Junctions.Here(),
+                            },
+                            fun: XcmV3MultiassetFungibility.Fungible(2_360_180_274n),
+                        },
+                    ],
+                    maximal: false,
                 }),
 
-                // 2c. Send swapped USDT back to Asset Hub
                 XcmV5Instruction.InitiateReserveWithdraw({
-                    assets: allAssets,
-                    reserve: para1Dest,
+                    assets: XcmV5AssetFilter.Wild(
+                        XcmV5WildAsset.AllOf({
+                            id: {
+                                parents: 1,
+                                interior: XcmV5Junctions.Here(),
+                            },
+                            fun: XcmV2MultiassetWildFungibility.Fungible(),
+                        }),
+                    ),
+                    reserve: {
+                        parents: 1,
+                        interior: XcmV5Junctions.X1(
+                            XcmV5Junction.Parachain(1000),
+                        ),
+                    },
                     xcm: [
                         XcmV5Instruction.BuyExecution({
-                            fees: dotFeeAsset,
+                            fees: {
+                                id: {
+                                    parents: 1,
+                                    interior: XcmV5Junctions.Here(),
+                                },
+                                fun: XcmV3MultiassetFungibility.Fungible(2_360_180_272n),
+                            },
                             weight_limit: XcmV3WeightLimit.Unlimited(),
                         }),
+
                         XcmV5Instruction.DepositAsset({
-                            assets: allAssets,
+                            assets: XcmV5AssetFilter.Wild(
+                                XcmV5WildAsset.AllOf({
+                                    id: {
+                                        parents: 1,
+                                        interior: XcmV5Junctions.Here(),
+                                    },
+                                    fun: XcmV2MultiassetWildFungibility.Fungible(),
+                                }),
+                            ),
                             beneficiary,
                         }),
                     ],
@@ -144,7 +187,6 @@ async function main() {
             ],
         }),
 
-        // 3. Set topic ID for the message (optional)
         XcmV5Instruction.SetTopic(Binary.fromHex(expectedMessageId)),
     ]);
 
@@ -156,11 +198,10 @@ async function main() {
         return;
     }
 
-    const tx: Transaction<any, string, string, any> =
-        para1Api.tx.PolkadotXcm.execute({
-            message,
-            max_weight: weight.value,
-        });
+    const tx: any = para1Api.tx.PolkadotXcm.execute({
+        message,
+        max_weight: weight.value,
+    });
     const decodedCall = tx.decodedCall as any;
     console.log("👀 Executing XCM:", JSON.stringify(decodedCall, toHuman, 2));
 
@@ -211,11 +252,11 @@ async function main() {
                     }
 
                     let processedMessageId = undefined;
-                    const maxRetries = 16;
+                    const maxRetries = 8;
                     for (let i = 0; i < maxRetries; i++) {
                         const parachainBlockAfter = await para2Client.getFinalizedBlock();
                         if (parachainBlockAfter.number == parachainBlockBefore.number) {
-                            const waiting = 1_000 * (i + 1);
+                            const waiting = 1_000 * (2 ** i);
                             console.log(`⏳ Waiting ${waiting}ms for ${para2Name} block to be finalised (${i + 1}/${maxRetries})...`);
                             await new Promise((resolve) => setTimeout(resolve, waiting));
                             continue;
