@@ -72,19 +72,18 @@ async function main() {
             XcmV5Junction.GeneralIndex(1984n),
         ]),
     };
-    const dest = {
-        parents: 1,
-        interior: XcmV5Junctions.X1(XcmV5Junction.Parachain(2034)),
-    };
     const giveId = {
         parents: 1,
-        interior: XcmV5Junctions.X3([
-            XcmV5Junction.Parachain(1000),
+        interior: XcmV5Junctions.X2([
             XcmV5Junction.PalletInstance(50),
             XcmV5Junction.GeneralIndex(1984n),
         ]),
     };
     const giveFun = XcmV3MultiassetFungibility.Fungible(1_000_000n);
+    const dest = {
+        parents: 1,
+        interior: XcmV5Junctions.X1(XcmV5Junction.Parachain(2034)),
+    };
     const wantId = {
         parents: 1,
         interior: XcmV5Junctions.Here(),
