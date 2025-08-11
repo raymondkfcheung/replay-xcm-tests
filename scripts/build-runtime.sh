@@ -22,23 +22,21 @@ if [ "${IS_SDK_ARGS}" != "false" ]; then
 fi
 CARGO_PROFILE="${3-release}" # Default Cargo profile
 
-# Dynamically derive Cargo package name: always append -runtime
+# Dynamically derive Cargo package name
 CARGO_PACKAGE="${TARGET_RUNTIME_ARG}-runtime"
 
-# Determine Chopsticks config base name: using a case statement instead of associative array
+# Determine Chopsticks config base name
 CHOPSTICKS_CONFIG_BASENAME=""
 case "${TARGET_RUNTIME_ARG}" in
-    "asset-hub-polkadot")
-        CHOPSTICKS_CONFIG_BASENAME="polkadot-asset-hub"
+    "asset-hub-"*)
+        # Extracts the part after "asset-hub-" (e.g., "polkadot")
+        NETWORK="${TARGET_RUNTIME_ARG#asset-hub-}"
+        CHOPSTICKS_CONFIG_BASENAME="${NETWORK}-asset-hub"
         ;;
-    "asset-hub-kusama")
-        CHOPSTICKS_CONFIG_BASENAME="kusama-asset-hub"
-        ;;
-    "asset-hub-westend")
-        CHOPSTICKS_CONFIG_BASENAME="westend-asset-hub"
-        ;;
-    "bridge-hub-westend")
-        CHOPSTICKS_CONFIG_BASENAME="westend-bridge-hub"
+    "bridge-hub-"*)
+        # Extracts the part after "bridge-hub-" (e.g., "westend")
+        NETWORK="${TARGET_RUNTIME_ARG#bridge-hub-}"
+        CHOPSTICKS_CONFIG_BASENAME="${NETWORK}-bridge-hub"
         ;;
     *) # Default case if no special mapping is found
         CHOPSTICKS_CONFIG_BASENAME="${TARGET_RUNTIME_ARG}"
