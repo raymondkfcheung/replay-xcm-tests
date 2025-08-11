@@ -44,7 +44,7 @@ async function getProcessedMessageId(client: PolkadotClient, api: TypedApi<any>,
         const blockAfter = await client.getFinalizedBlock();
         if (blockAfter.number == blockBefore.number) {
             const waiting = 1_000 * (2 ** i);
-            console.log(`⏳ Waiting ${waiting}ms for ${name} block to be finalised (${i + 1}/${maxRetries})...`);
+            console.log(`⏳ Waiting ${waiting / 1_000}s for ${name} block to be finalised (${i + 1}/${maxRetries})...`);
             await new Promise((resolve) => setTimeout(resolve, waiting));
             continue;
         }
