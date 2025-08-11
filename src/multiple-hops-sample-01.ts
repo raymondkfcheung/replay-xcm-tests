@@ -1,4 +1,4 @@
-import { Binary, createClient, Enum, Transaction } from "polkadot-api";
+import { Binary, createClient, Enum } from "polkadot-api";
 import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat";
 import { getPolkadotSigner } from "polkadot-api/signer";
 import { getWsProvider } from "polkadot-api/ws-provider/web";
@@ -65,41 +65,48 @@ async function main() {
             id: Binary.fromHex("0x9818ff3c27d256631065ecabf0c50e02551e5c5342b8669486c1e566fcbf847f")
         })),
     }
-
     const allAssets = XcmV5AssetFilter.Wild(XcmV5WildAsset.All());
-    const para1Dest = {
+    const assetId = {
         parents: 1,
         interior: XcmV5Junctions.Here(),
     };
-    const dotAssetId = {
+    const giveId = {
         parents: 1,
         interior: XcmV5Junctions.Here(),
     };
+    const giveFun = XcmV3MultiassetFungibility.Fungible(UNIT);
+    const giveAsset = {
+        id: giveId,
+        fun: giveFun,
+    };
+    const dest = {
+        parents: 1,
+        interior: XcmV5Junctions.X1(XcmV5Junction.Parachain(2034)),
+    };
+    const wantId = {
+        parents: 0,
+        interior: XcmV5Junctions.X2([
+            XcmV5Junction.PalletInstance(50),
+            XcmV5Junction.GeneralIndex(1984n),
+        ]),
+    };
+    const wantFun = XcmV3MultiassetFungibility.Fungible(UNIT * 4n);
+    const wantAsset = {
+        id: wantId,
+        fun: wantFun,
+    };
+    const reserve = assetId;
+    const dotAssetId = assetId;
     const dotAsset = {
         id: dotAssetId,
-        fun: XcmV3MultiassetFungibility.Fungible(UNIT * 2n),
+        fun: giveFun,
     };
     const dotAssetSwapFilter = XcmV5AssetFilter.Definite([dotAsset]);
     const dotFeeAsset = {
         id: dotAssetId,
-        fun: XcmV3MultiassetFungibility.Fungible(UNIT),
+        fun: giveFun,
     };
-
-    const para2Dest = {
-        parents: 1,
-        interior: XcmV5Junctions.X1(XcmV5Junction.Parachain(2034)),
-    };
-    const usdtAsset = {
-        id: {
-            parents: 0,
-            interior: XcmV5Junctions.X2([
-                XcmV5Junction.PalletInstance(50),
-                XcmV5Junction.GeneralIndex(1984n),
-            ]),
-        },
-        fun: XcmV3MultiassetFungibility.Fungible(UNIT),
-    };
-
+    const usdtAsset = wantAsset;
     const expectedMessageId = "0xd60225f721599cb7c6e23cdf4fab26f205e30cd7eb6b5ccf6637cdc80b2339b2";
 
     const message = XcmVersionedXcm.V5([
@@ -111,7 +118,7 @@ async function main() {
         // 2. Deposit to Hydration with instructions
         XcmV5Instruction.DepositReserveAsset({
             assets: allAssets,
-            dest: para2Dest,
+            dest,
             xcm: [
                 // 2a. Pay for execution on Hydration
                 XcmV5Instruction.BuyExecution({
@@ -129,12 +136,13 @@ async function main() {
                 // 2c. Send swapped USDT back to Asset Hub
                 XcmV5Instruction.InitiateReserveWithdraw({
                     assets: allAssets,
-                    reserve: para1Dest,
+                    reserve,
                     xcm: [
                         XcmV5Instruction.BuyExecution({
                             fees: dotFeeAsset,
                             weight_limit: XcmV3WeightLimit.Unlimited(),
                         }),
+
                         XcmV5Instruction.DepositAsset({
                             assets: allAssets,
                             beneficiary,
@@ -156,11 +164,10 @@ async function main() {
         return;
     }
 
-    const tx: Transaction<any, string, string, any> =
-        para1Api.tx.PolkadotXcm.execute({
-            message,
-            max_weight: weight.value,
-        });
+    const tx: any = para1Api.tx.PolkadotXcm.execute({
+        message,
+        max_weight: weight.value,
+    });
     const decodedCall = tx.decodedCall as any;
     console.log("👀 Executing XCM:", JSON.stringify(decodedCall, toHuman, 2));
 
@@ -211,11 +218,11 @@ async function main() {
                     }
 
                     let processedMessageId = undefined;
-                    const maxRetries = 16;
+                    const maxRetries = 8;
                     for (let i = 0; i < maxRetries; i++) {
                         const parachainBlockAfter = await para2Client.getFinalizedBlock();
                         if (parachainBlockAfter.number == parachainBlockBefore.number) {
-                            const waiting = 1_000 * (i + 1);
+                            const waiting = 1_000 * (2 ** i);
                             console.log(`⏳ Waiting ${waiting}ms for ${para2Name} block to be finalised (${i + 1}/${maxRetries})...`);
                             await new Promise((resolve) => setTimeout(resolve, waiting));
                             continue;
