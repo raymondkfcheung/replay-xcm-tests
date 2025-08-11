@@ -65,18 +65,37 @@ async function main() {
             id: Binary.fromHex("0x9818ff3c27d256631065ecabf0c50e02551e5c5342b8669486c1e566fcbf847f")
         })),
     }
+    const assetId = {
+        parents: 0,
+        interior: XcmV5Junctions.X2([
+            XcmV5Junction.PalletInstance(50),
+            XcmV5Junction.GeneralIndex(1984n),
+        ]),
+    };
+    const dest = {
+        parents: 1,
+        interior: XcmV5Junctions.X1(XcmV5Junction.Parachain(2034)),
+    };
+    const giveId = {
+        parents: 1,
+        interior: XcmV5Junctions.X3([
+            XcmV5Junction.Parachain(1000),
+            XcmV5Junction.PalletInstance(50),
+            XcmV5Junction.GeneralIndex(1984n),
+        ]),
+    };
+    const giveFun = XcmV3MultiassetFungibility.Fungible(1_000_000n);
+    const wantId = {
+        parents: 1,
+        interior: XcmV5Junctions.Here(),
+    };
+    const wantFun = XcmV3MultiassetFungibility.Fungible(4_000_000n);
     const expectedMessageId = "0xd60225f721599cb7c6e23cdf4fab26f205e30cd7eb6b5ccf6637cdc80b2339b2";
 
     const message = XcmVersionedXcm.V5([
         XcmV5Instruction.WithdrawAsset([{
-            id: {
-                parents: 0,
-                interior: XcmV5Junctions.X2([
-                    XcmV5Junction.PalletInstance(50),
-                    XcmV5Junction.GeneralIndex(1984n),
-                ]),
-            },
-            fun: XcmV3MultiassetFungibility.Fungible(1_000_000n),
+            id: assetId,
+            fun: giveFun,
         }]),
 
         XcmV5Instruction.SetFeesMode({ jit_withdraw: true }),
@@ -84,31 +103,15 @@ async function main() {
         XcmV5Instruction.DepositReserveAsset({
             assets: XcmV5AssetFilter.Wild(
                 XcmV5WildAsset.AllOf({
-                    id: {
-                        parents: 0,
-                        interior: XcmV5Junctions.X2([
-                            XcmV5Junction.PalletInstance(50),
-                            XcmV5Junction.GeneralIndex(1984n),
-                        ]),
-                    },
+                    id: assetId,
                     fun: XcmV2MultiassetWildFungibility.Fungible(),
                 })),
-            dest: {
-                parents: 1,
-                interior: XcmV5Junctions.X1(XcmV5Junction.Parachain(2034)),
-            },
+            dest,
             xcm: [
                 XcmV5Instruction.BuyExecution({
                     fees: {
-                        id: {
-                            parents: 1,
-                            interior: XcmV5Junctions.X3([
-                                XcmV5Junction.Parachain(1000),
-                                XcmV5Junction.PalletInstance(50),
-                                XcmV5Junction.GeneralIndex(1984n),
-                            ]),
-                        },
-                        fun: XcmV3MultiassetFungibility.Fungible(1_000_000n),
+                        id: giveId,
+                        fun: giveFun,
                     },
                     weight_limit: XcmV3WeightLimit.Unlimited(),
                 }),
@@ -116,36 +119,21 @@ async function main() {
                 XcmV5Instruction.ExchangeAsset({
                     give: XcmV5AssetFilter.Wild(
                         XcmV5WildAsset.AllOf({
-                            id: {
-                                parents: 1,
-                                interior: XcmV5Junctions.X3([
-                                    XcmV5Junction.Parachain(1000),
-                                    XcmV5Junction.PalletInstance(50),
-                                    XcmV5Junction.GeneralIndex(1984n),
-                                ]),
-                            },
+                            id: giveId,
                             fun: XcmV2MultiassetWildFungibility.Fungible(),
                         }),
                     ),
-                    want: [
-                        {
-                            id: {
-                                parents: 1,
-                                interior: XcmV5Junctions.Here(),
-                            },
-                            fun: XcmV3MultiassetFungibility.Fungible(2_360_180_274n),
-                        },
-                    ],
+                    want: [{
+                        id: wantId,
+                        fun: wantFun,
+                    }],
                     maximal: false,
                 }),
 
                 XcmV5Instruction.InitiateReserveWithdraw({
                     assets: XcmV5AssetFilter.Wild(
                         XcmV5WildAsset.AllOf({
-                            id: {
-                                parents: 1,
-                                interior: XcmV5Junctions.Here(),
-                            },
+                            id: wantId,
                             fun: XcmV2MultiassetWildFungibility.Fungible(),
                         }),
                     ),
@@ -158,11 +146,8 @@ async function main() {
                     xcm: [
                         XcmV5Instruction.BuyExecution({
                             fees: {
-                                id: {
-                                    parents: 1,
-                                    interior: XcmV5Junctions.Here(),
-                                },
-                                fun: XcmV3MultiassetFungibility.Fungible(2_360_180_272n),
+                                id: wantId,
+                                fun: wantFun,
                             },
                             weight_limit: XcmV3WeightLimit.Unlimited(),
                         }),
@@ -170,10 +155,7 @@ async function main() {
                         XcmV5Instruction.DepositAsset({
                             assets: XcmV5AssetFilter.Wild(
                                 XcmV5WildAsset.AllOf({
-                                    id: {
-                                        parents: 1,
-                                        interior: XcmV5Junctions.Here(),
-                                    },
+                                    id: wantId,
                                     fun: XcmV2MultiassetWildFungibility.Fungible(),
                                 }),
                             ),

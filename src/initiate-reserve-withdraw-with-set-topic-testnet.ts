@@ -3,8 +3,8 @@ import { withPolkadotSdkCompat } from "polkadot-api/polkadot-sdk-compat";
 import { getPolkadotSigner } from "polkadot-api/signer";
 import { getWsProvider } from "polkadot-api/ws-provider/web";
 import {
-    assetHub,
-    hydration,
+    assetHubWestend,
+    bridgeHubWestend,
     XcmV2MultiassetWildFungibility,
     XcmV3MultiassetFungibility,
     XcmV3WeightLimit,
@@ -41,17 +41,17 @@ const toHuman = (_key: any, value: any) => {
 };
 
 async function main() {
-    const para1Name = "Polkadot Asset Hub";
+    const para1Name = "Westend Asset Hub";
     const para1Client = createClient(
         withPolkadotSdkCompat(getWsProvider("ws://localhost:8000")),
     );
-    const para1Api = para1Client.getTypedApi(assetHub);
+    const para1Api = para1Client.getTypedApi(assetHubWestend);
 
-    const para2Name = "Hydration";
+    const para2Name = "Westend Bridge Hub";
     const para2Client = createClient(
         withPolkadotSdkCompat(getWsProvider("ws://localhost:8001")),
     );
-    const para2Api = para2Client.getTypedApi(hydration);
+    const para2Api = para2Client.getTypedApi(bridgeHubWestend);
 
     const entropy = mnemonicToEntropy(DEV_PHRASE);
     const miniSecret = entropyToMiniSecret(entropy);
@@ -76,7 +76,7 @@ async function main() {
                 parents: 0,
                 interior: XcmV5Junctions.X2([
                     XcmV5Junction.PalletInstance(50),
-                    XcmV5Junction.GeneralIndex(1984n),
+                    XcmV5Junction.GeneralIndex(1337n),
                 ]),
             },
             fun: XcmV3MultiassetFungibility.Fungible(1_000_000n),
@@ -91,7 +91,7 @@ async function main() {
                         parents: 0,
                         interior: XcmV5Junctions.X2([
                             XcmV5Junction.PalletInstance(50),
-                            XcmV5Junction.GeneralIndex(1984n),
+                            XcmV5Junction.GeneralIndex(1337n),
                         ]),
                     },
                     fun: XcmV2MultiassetWildFungibility.Fungible(),
@@ -108,7 +108,7 @@ async function main() {
                             interior: XcmV5Junctions.X3([
                                 XcmV5Junction.Parachain(1000),
                                 XcmV5Junction.PalletInstance(50),
-                                XcmV5Junction.GeneralIndex(1984n),
+                                XcmV5Junction.GeneralIndex(1337n),
                             ]),
                         },
                         fun: XcmV3MultiassetFungibility.Fungible(1_000_000n),
@@ -124,7 +124,7 @@ async function main() {
                                 interior: XcmV5Junctions.X3([
                                     XcmV5Junction.Parachain(1000),
                                     XcmV5Junction.PalletInstance(50),
-                                    XcmV5Junction.GeneralIndex(1984n),
+                                    XcmV5Junction.GeneralIndex(2_000_000_000n),
                                 ]),
                             },
                             fun: XcmV2MultiassetWildFungibility.Fungible(),
