@@ -193,6 +193,8 @@ async function main() {
                             ),
                             beneficiary,
                         }),
+
+                        XcmV5Instruction.SetTopic(Binary.fromHex(expectedMessageId)),
                     ],
                 }),
             ],

@@ -38,6 +38,9 @@ case "${TARGET_RUNTIME_ARG}" in
         NETWORK="${TARGET_RUNTIME_ARG#bridge-hub-}"
         CHOPSTICKS_CONFIG_BASENAME="${NETWORK}-bridge-hub"
         ;;
+    "coretime-polkadot")
+        CHOPSTICKS_CONFIG_BASENAME="polkadot-coretime"
+        ;;
     *) # Default case if no special mapping is found
         CHOPSTICKS_CONFIG_BASENAME="${TARGET_RUNTIME_ARG}"
         ;;
