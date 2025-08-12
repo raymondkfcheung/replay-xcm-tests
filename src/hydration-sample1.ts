@@ -88,7 +88,7 @@ async function main() {
         const sentEvents = await assetHubApi.event.PolkadotXcm.Sent.pull();
         if (sentEvents.length > 0) {
             const sentMessageId = sentEvents[0].payload.message_id.asHex();
-            console.log(`📣 Last message Sent on Polkadot Asset Hub: ${sentMessageId}`);
+            console.log(`📣 Last message sent on Polkadot Asset Hub: ${sentMessageId}`);
 
             let processedMessageId = undefined
             const maxRetries = 8;
@@ -105,7 +105,7 @@ async function main() {
                 const processedEvents = await hydrationApi.event.MessageQueue.Processed.pull();
                 if (processedEvents.length > 0) {
                     processedMessageId = processedEvents[0].payload.id.asHex();
-                    console.log(`📣 Last message Processed on Hydration: ${processedMessageId}`);
+                    console.log(`📣 Last message processed on Hydration: ${processedMessageId}`);
                 } else {
                     console.log("📣 No Processed events on Hydration found.");
                 }
