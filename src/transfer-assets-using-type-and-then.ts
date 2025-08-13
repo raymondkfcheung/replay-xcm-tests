@@ -92,7 +92,7 @@ async function main() {
         ]),
         weight_limit: XcmV3WeightLimit.Unlimited(),
     });
-    const decodedCall = tx.decodedCall as any;
+    const decodedCall: any = tx.decodedCall;
     console.log("👀 Executing XCM:", JSON.stringify(decodedCall, toHuman, 2));
 
     const dryRunResult: any = await assetHubApi.apis.DryRunApi.dry_run_call(

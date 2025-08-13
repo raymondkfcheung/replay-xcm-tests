@@ -48,7 +48,7 @@ async function main() {
         "0x1f0804010100c91f0400010100904e6c1bea56405e8ad6ba79eb5f39b0114635c46a22e93c64115dfc0252e12a040401000003009435770000000000"
     );
     const tx: Transaction<any, string, string, any> = await assetHubApi.txFromCallData(callData);
-    const decodedCall = tx.decodedCall as any;
+    const decodedCall: any = tx.decodedCall;
     console.log("👀 Executing XCM:", JSON.stringify(decodedCall, toHuman, 2));
 
     const dryRunResult: any = await assetHubApi.apis.DryRunApi.dry_run_call(
