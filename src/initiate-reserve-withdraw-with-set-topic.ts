@@ -24,6 +24,7 @@ import {
 } from "@polkadot-labs/hdkd-helpers";
 
 const XCM_VERSION = 5;
+const MAX_RETRIES = 4;
 
 const toHuman = (_key: any, value: any) => {
     if (typeof value === "bigint") {
@@ -37,14 +38,19 @@ const toHuman = (_key: any, value: any) => {
     return value;
 };
 
-async function getProcessedMessageId(client: PolkadotClient, api: TypedApi<any>, name: String, blockBefore: BlockInfo): Promise<String> {
+async function assertProcessedMessageId(
+    client: PolkadotClient,
+    api: TypedApi<any>,
+    name: String,
+    blockBefore: BlockInfo,
+    expectedMessageId: String,
+) {
     let processedMessageId = undefined;
-    const maxRetries = 8;
-    for (let i = 0; i < maxRetries; i++) {
+    for (let i = 0; i < MAX_RETRIES; i++) {
         const blockAfter = await client.getFinalizedBlock();
         if (blockAfter.number == blockBefore.number) {
             const waiting = 1_000 * (2 ** i);
-            console.log(`⏳ Waiting ${waiting / 1_000}s for ${name} block to be finalised (${i + 1}/${maxRetries})...`);
+            console.log(`⏳ Waiting ${waiting / 1_000}s for ${name} block to be finalised (${i + 1}/${MAX_RETRIES})...`);
             await new Promise((resolve) => setTimeout(resolve, waiting));
             continue;
         }
@@ -66,7 +72,11 @@ async function getProcessedMessageId(client: PolkadotClient, api: TypedApi<any>,
         }
     }
 
-    return processedMessageId;
+    if (processedMessageId === expectedMessageId) {
+        console.log(`✅ Processed Message ID on ${name} matched.`);
+    } else {
+        console.error(`❌ Processed Message ID [${processedMessageId}] on ${name} doesn't match expected Message ID [${expectedMessageId}].`);
+    }
 }
 
 async function main() {
@@ -121,7 +131,7 @@ async function main() {
         parents: 1,
         interior: XcmV5Junctions.Here(),
     };
-    const wantFun = XcmV3MultiassetFungibility.Fungible(3_552_961_212n);
+    const wantFun = XcmV3MultiassetFungibility.Fungible(3_000_000_000n);
     const expectedMessageId = "0xd60225f721599cb7c6e23cdf4fab26f205e30cd7eb6b5ccf6637cdc80b2339b2";
 
     const message = XcmVersionedXcm.V5([
@@ -241,8 +251,8 @@ async function main() {
             } else {
                 let para2BlockBefore = await para2Client.getFinalizedBlock();
                 const extrinsic = await tx.signAndSubmit(aliceSigner);
-                const para1BlockBefore = extrinsic.block;
-                console.log(`📦 Finalised on ${para1Name} in block #${para1BlockBefore.number}: ${para1BlockBefore.hash}`);
+                const para1Block = extrinsic.block;
+                console.log(`📦 Finalised on ${para1Name} in block #${para1Block.number}: ${para1Block.hash}`);
 
                 if (!extrinsic.ok) {
                     const dispatchError = extrinsic.dispatchError;
@@ -263,20 +273,8 @@ async function main() {
                     } else {
                         console.error(`❌ Sent Message ID [${sentMessageId}] on ${para1Name} doesn't match expexted Message ID [${expectedMessageId}].`);
                     }
-
-                    let processedMessageId = await getProcessedMessageId(para2Client, para2Api, para2Name, para2BlockBefore);
-                    if (processedMessageId === expectedMessageId) {
-                        console.log(`✅ Processed Message ID on ${para2Name} matched.`);
-                    } else {
-                        console.error(`❌ Processed Message ID [${processedMessageId}] on ${para2Name} doesn't match expected Message ID [${expectedMessageId}].`);
-                    }
-
-                    let processedMessageIdOnPara1 = await getProcessedMessageId(para1Client, para1Api, para1Name, para1BlockBefore);
-                    if (processedMessageIdOnPara1 === expectedMessageId) {
-                        console.log(`✅ Processed Message ID on ${para1Name} matched.`);
-                    } else {
-                        console.error(`❌ Processed Message ID [${processedMessageIdOnPara1}] on ${para1Name} doesn't match expected Message ID [${expectedMessageId}].`);
-                    }
+                    await assertProcessedMessageId(para2Client, para2Api, para2Name, para2BlockBefore, expectedMessageId);
+                    await assertProcessedMessageId(para1Client, para1Api, para1Name, para1Block, expectedMessageId);
                 } else {
                     console.log(`📣 No Sent events on ${para1Name} found.`);
                 }
