@@ -21,7 +21,7 @@ Assuming you're familiar with how to replay a forked chain using [Chopsticks](ht
 npx ts-node src/limited-reserve-transfer-assets.ts
 ```
 
-### ✅ Local XCM (on origin chain - e.g., Polkadot Asset Hub)
+### ✅ Local XCM (on origin chain - e.g., Polkadot Hub)
 
 ```json
 {
@@ -78,8 +78,8 @@ This forwarded message lands on the destination chain (Acala) and is processed a
 
 ```console
 ✅ Local dry run successful.
-📦 Finalised on Polkadot Asset Hub in block #9079592: 0x6de0cd268f07ec040a69dbbcb81f86c6fc4954dfa7fc914edd5dae1e3f235083
-📣 Last message sent on Polkadot Asset Hub: 0xb4b8d2c87622cbad983d8f2c92bfe28e12d587e13d15ea4fdabe8f771bf86bce
+📦 Finalised on Polkadot Hub in block #9079592: 0x6de0cd268f07ec040a69dbbcb81f86c6fc4954dfa7fc914edd5dae1e3f235083
+📣 Last message sent on Polkadot Hub: 0xb4b8d2c87622cbad983d8f2c92bfe28e12d587e13d15ea4fdabe8f771bf86bce
 📦 Finalised on Acala in block #8826386: 0xfda51e7e411ee59c569fc051ef51431b04edebcc5d45d7b1d1bdfcce9627638a
 📣 Last message processed on Acala: 0xb4b8d2c87622cbad983d8f2c92bfe28e12d587e13d15ea4fdabe8f771bf86bce
 ✅ Message ID matched.
@@ -172,8 +172,8 @@ const message = XcmVersionedXcm.V5([
 📦 Example log output:
 
 ```console
-📦 Finalised on Polkadot Asset Hub in block #9294993: 0xa4e15ad6eae7fcd837f7a7c02a1925165bd97597fbe1ceb74adc17d3cbcf34bd
-📣 Last message sent on Polkadot Asset Hub: 0x836c6039763718fd3db4e22484fc4bacd7ddf1c74b6067d15b297ea72d8ecf89
+📦 Finalised on Polkadot Hub in block #9294993: 0xa4e15ad6eae7fcd837f7a7c02a1925165bd97597fbe1ceb74adc17d3cbcf34bd
+📣 Last message sent on Polkadot Hub: 0x836c6039763718fd3db4e22484fc4bacd7ddf1c74b6067d15b297ea72d8ecf89
 ✅ Sent message ID matched.
 📦 Finalised on Hydration in block #8377216: 0x6bb6e7d69c2d574f8646f3c739d872ab832850a44659ea9401249dbe11a4c447
 📣 Last message processed on Hydration: 0x836c6039763718fd3db4e22484fc4bacd7ddf1c74b6067d15b297ea72d8ecf89

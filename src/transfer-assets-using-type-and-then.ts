@@ -117,7 +117,7 @@ async function main() {
         let parachainBlockBefore = await parachainClient.getFinalizedBlock()
 
         const ev = await tx.signAndSubmit(aliceSigner);
-        console.log(`📦 Finalised on Polkadot Asset Hub in block #${ev.block.number}: ${ev.block.hash}`);
+        console.log(`📦 Finalised on Polkadot Hub in block #${ev.block.number}: ${ev.block.hash}`);
 
         if (!ev.ok) {
             const dispatchError = ev.dispatchError;
@@ -132,7 +132,7 @@ async function main() {
         const sentEvents = await assetHubApi.event.PolkadotXcm.Sent.pull();
         if (sentEvents.length > 0) {
             const sentMessageId = sentEvents[0].payload.message_id.asHex();
-            console.log(`📣 Last message sent on Polkadot Asset Hub: ${sentMessageId}`);
+            console.log(`📣 Last message sent on Polkadot Hub: ${sentMessageId}`);
 
             let processedMessageId = undefined
             const maxRetries = 8;
@@ -163,7 +163,7 @@ async function main() {
                 console.error("❌ Processed message ID does not match sent message ID.");
             }
         } else {
-            console.log("📣 No Sent events on Polkadot Asset Hub found.");
+            console.log("📣 No Sent events on Polkadot Hub found.");
         }
     }
 

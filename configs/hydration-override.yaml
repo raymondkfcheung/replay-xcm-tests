@@ -129,7 +129,7 @@ import-storage:
       -
         -
           - 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY
-          - 22 # USDC (Polkadot Asset Hub)
+          - 22 # USDC (Polkadot Hub)
         - free: '100000000000000000000000'
       -
         -
