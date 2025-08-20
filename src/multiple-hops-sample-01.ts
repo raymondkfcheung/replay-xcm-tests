@@ -213,7 +213,7 @@ async function main() {
                     if (sentMessageId === expectedMessageId) {
                         console.log("✅ Sent message ID matched.");
                     } else {
-                        console.error("❌ Sent message ID does not match expexted message ID.");
+                        console.error("❌ Sent message ID does not match expected message ID.");
                     }
 
                     let processedMessageId = undefined;
