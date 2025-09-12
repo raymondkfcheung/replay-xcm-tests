@@ -1,6 +1,6 @@
 import { fromHex, mergeUint8, toHex } from "@polkadot-api/utils";
 import { Binary } from "polkadot-api";
-import { blake2b } from "@noble/hashes/blake2b";
+import { blake2b } from "@noble/hashes/blake2";
 
 function forwardIdFor(originalMessageId: string): string {
   // Decode the hex original_id into bytes
